@@ -23,8 +23,17 @@ export async function GET() {
   const ownRequestId =
     g.user.role === "LEADER" ? { leaderId: g.user.id } : {};
 
-  const [items, incoming, confirmed, turnoverCount, pendingAdmin, pendingDirector] =
-    await Promise.all([
+  const [
+    items,
+    incoming,
+    confirmed,
+    turnoverCount,
+    pendingAdmin,
+    pendingDirector,
+    readyToShip,
+    onSiteCount,
+    completedCount,
+  ] = await Promise.all([
       prisma.item.findMany({ orderBy: { code: "asc" } }),
       prisma.incoming.findMany({
         where: { receivedAt: { gte: startMonth } },
@@ -51,6 +60,13 @@ export async function GET() {
       }),
       prisma.request.count({ where: { status: "PENDING_ADMIN", ...ownRequestId } }),
       prisma.request.count({ where: { status: "PENDING_DIRECTOR", ...ownRequestId } }),
+      prisma.request.count({
+        where: { status: "APPROVED", delivery: { is: null }, ...ownRequestId },
+      }),
+      prisma.deliveryNote.count({
+        where: { status: { in: ["ISSUED", "CONFIRMED"] }, ...ownRequest },
+      }),
+      prisma.request.count({ where: { status: "COMPLETED", ...ownRequestId } }),
     ]);
 
   const chart = Array.from({ length: 6 }, (_, index) => {
@@ -97,5 +113,12 @@ export async function GET() {
     outgoingThisMonth,
     onSite: confirmed.slice(0, 5),
     chart,
+    pipeline: {
+      pendingAdmin,
+      pendingDirector,
+      readyToShip,
+      onSite: onSiteCount,
+      completed: completedCount,
+    },
   });
 }

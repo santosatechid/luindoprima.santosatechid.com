@@ -36,5 +36,7 @@ export function inRange(
 }
 
 export function uniqueValues(values: (string | null | undefined)[]) {
-  return Array.from(new Set(values.filter((value): value is string => !!value))).sort();
+  return Array.from(
+    new Set(values.filter((value): value is string => !!value)),
+  ).sort();
 }

@@ -151,6 +151,13 @@ export type DashboardData = {
   outgoingThisMonth: number;
   onSite: OnSiteNote[];
   chart: { month: string; masuk: number; keluar: number }[];
+  pipeline: {
+    pendingAdmin: number;
+    pendingDirector: number;
+    readyToShip: number;
+    onSite: number;
+    completed: number;
+  };
 };
 
 export type AppUser = {

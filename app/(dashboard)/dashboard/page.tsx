@@ -14,6 +14,7 @@ import {
 import Link from "next/link";
 
 import { PageHeader } from "@/components/shell/page-header";
+import { RequestPipeline } from "@/components/shell/request-pipeline";
 import { EmptyState, StatCard } from "@/components/shell/stat-card";
 import { StatusBadge } from "@/components/shell/status-badge";
 import {
@@ -80,13 +81,18 @@ export default function DashboardPage() {
       />
 
       {isLoading || !data ? (
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Skeleton key={index} className="h-[104px] rounded-xl" />
-          ))}
-        </div>
+        <>
+          <Skeleton className="h-[206px] rounded-xl" />
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, index) => (
+              <Skeleton key={index} className="h-[104px] rounded-xl" />
+            ))}
+          </div>
+        </>
       ) : (
         <>
+          <RequestPipeline pipeline={data.pipeline} />
+
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
             <StatCard
               label="Total Item Consumable"
