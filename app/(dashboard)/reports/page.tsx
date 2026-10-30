@@ -324,7 +324,7 @@ export default function ReportsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {outgoingRows.slice(0, 8).map((row) => (
+            {outgoingRows.map((row) => (
               <TableRow key={row.id}>
                 <TableCell className="text-xs">
                   {formatDate(row.confirmedAt ?? row.issuedAt)}
@@ -338,10 +338,19 @@ export default function ReportsPage() {
                 <TableCell className="text-muted-foreground text-xs">
                   {row.request.leader.name}
                 </TableCell>
-                <TableCell className="text-muted-foreground text-xs">
-                  {row.items.map((item) => item.item.name).join(", ")}
-                </TableCell>
                 <TableCell className="text-xs">
+                  <div className="flex flex-col gap-0.5">
+                    {row.items.map((item) => (
+                      <p key={item.id} className="text-muted-foreground">
+                        {item.item.name}{" "}
+                        <span className="text-foreground font-medium tabular-nums">
+                          × {item.qty} {item.item.unit}
+                        </span>
+                      </p>
+                    ))}
+                  </div>
+                </TableCell>
+                <TableCell className="text-xs font-semibold tabular-nums">
                   {row.items.reduce((sum, item) => sum + item.qty, 0)} unit
                 </TableCell>
                 <TableCell>
@@ -361,6 +370,10 @@ export default function ReportsPage() {
             ) : null}
           </TableBody>
         </Table>
+        <p className="text-muted-foreground text-[11.5px]">
+          Total {outgoingRows.length} surat jalan · {outgoingQty} unit barang
+          keluar.
+        </p>
       </div>
     </div>
   );
