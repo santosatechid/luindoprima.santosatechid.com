@@ -15,13 +15,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Table,
   TableBody,
@@ -70,16 +64,19 @@ export default function InspectionsPage() {
     });
 
   const sites = Array.from(new Set(rows.map((row) => row.request.site)));
-  const customers = uniqueValues(rows.map((row) => row.request.customer));
+  const customers = uniqueValues(
+    rows.map((row) => row.request.customer?.name),
+  );
   const selected = rows.find((row) => row.request.id === selectedId);
   const filtered = rows.filter((row) => {
     const query = search.toLowerCase();
     return (
       (site === "ALL" || row.request.site === site) &&
-      (customer === "ALL" || row.request.customer === customer) &&
-      (row.request.jobNo.toLowerCase().includes(query) ||
+      (customer === "ALL" || row.request.customer?.name === customer) &&
+      (row.request.poNo.toLowerCase().includes(query) ||
         row.request.site.toLowerCase().includes(query) ||
-        (row.request.customer ?? "").toLowerCase().includes(query) ||
+        (row.request.customer?.name ?? "").toLowerCase().includes(query) ||
+        (row.request.customer?.company ?? "").toLowerCase().includes(query) ||
         row.request.leader.name.toLowerCase().includes(query)) &&
       inRange(row.request.createdAt, dateFrom, dateTo)
     );
@@ -105,7 +102,7 @@ export default function InspectionsPage() {
                   "Dibutuhkan",
                 ],
                 ...filtered.map((row) => [
-                  row.request.jobNo,
+                  row.request.poNo,
                   row.request.site,
                   row.request.leader.name,
                   row.request.status,
@@ -155,32 +152,26 @@ export default function InspectionsPage() {
               className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
             />
           </div>
-          <Select value={site} onValueChange={setSite}>
-            <SelectTrigger className="h-9 w-full text-xs sm:w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Semua site</SelectItem>
-              {sites.map((value) => (
-                <SelectItem key={value} value={value}>
-                  {value}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={customer} onValueChange={setCustomer}>
-            <SelectTrigger className="h-9 w-full text-xs sm:w-[170px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Semua pelanggan</SelectItem>
-              {customers.map((value) => (
-                <SelectItem key={value} value={value}>
-                  {value}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <SearchableSelect
+            value={site}
+            onValueChange={setSite}
+            searchPlaceholder="Cari site…"
+            options={[
+              { value: "ALL", label: "Semua site" },
+              ...sites.map((value) => ({ value, label: value })),
+            ]}
+            className="h-9 w-full text-xs sm:w-[180px]"
+          />
+          <SearchableSelect
+            value={customer}
+            onValueChange={setCustomer}
+            searchPlaceholder="Cari pelanggan…"
+            options={[
+              { value: "ALL", label: "Semua pelanggan" },
+              ...customers.map((value) => ({ value, label: value })),
+            ]}
+            className="h-9 w-full text-xs sm:w-[170px]"
+          />
           <DateRangePicker
             from={dateFrom}
             to={dateTo}
@@ -218,13 +209,15 @@ export default function InspectionsPage() {
                   onClick={() => setSelectedId(row.request.id)}
                 >
                   <TableCell>
-                    <p className="text-xs font-medium">{row.request.jobNo}</p>
+                    <p className="text-xs font-medium">{row.request.poNo}</p>
                     <p className="text-muted-foreground text-[10.5px]">
                       {row.request.site}
                     </p>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    {row.request.customer ?? "—"}
+                    {row.request.customer?.company ??
+                      row.request.customer?.name ??
+                      "—"}
                   </TableCell>
                   <TableCell className="text-xs">
                     {row.request.leader.name}
@@ -299,7 +292,7 @@ export default function InspectionsPage() {
             <>
               <DialogHeader>
                 <DialogTitle className="flex items-center justify-between gap-2">
-                  <span>{selected.request.jobNo}</span>
+                  <span>{selected.request.poNo}</span>
                   <StatusBadge status={selected.request.status} />
                 </DialogTitle>
               </DialogHeader>

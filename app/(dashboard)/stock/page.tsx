@@ -11,17 +11,12 @@ import {
 import { useMemo, useState } from "react";
 
 import { PageHeader } from "@/components/shell/page-header";
+import { TableSkeleton } from "@/components/shell/loading-state";
 import { EmptyState, StatCard } from "@/components/shell/stat-card";
 import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Table,
   TableBody,
@@ -30,6 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useDeliveryNotes } from "@/hooks/inventory/useDeliveryNotes";
+import { useTurnovers } from "@/hooks/inventory/useTurnovers";
 import { useItems, useSuppliers } from "@/hooks/inventory/useItems";
 import { downloadCsv } from "@/lib/csv";
 import { formatDateTime } from "@/lib/format";
@@ -50,7 +48,10 @@ export default function StockPage() {
     dataUpdatedAt,
   } = useItems({ staleTime: 30 * 1000 });
   const { data: suppliers = [] } = useSuppliers();
+  const { data: notes = [] } = useDeliveryNotes();
+  const { data: turnovers = [] } = useTurnovers();
 
+  const [tab, setTab] = useState("stock");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("ALL");
   const [supplierFilter, setSupplierFilter] = useState("ALL");
@@ -89,6 +90,137 @@ export default function StockPage() {
     0,
   );
   const lowStock = items.filter((item) => item.stockGudang <= item.minStock);
+
+  const summaryRows = useMemo(() => {
+    type SummaryRow = {
+      key: string;
+      itemId: string;
+      code: string;
+      name: string;
+      size: string | null;
+      unit: string;
+      stockGudang: number;
+      minStock: number;
+      customer: string;
+      leaders: Set<string>;
+      delivered: number;
+      used: number;
+      returned: number;
+      damaged: number;
+    };
+
+    const itemById = new Map(items.map((item) => [item.id, item]));
+    const noteById = new Map(notes.map((note) => [note.id, note]));
+    const map = new Map<string, SummaryRow>();
+
+    function entryFor(
+      itemId: string,
+      customerName: string,
+      fallback?: {
+        code: string;
+        name: string;
+        size: string | null;
+        unit: string;
+        stockGudang: number;
+        minStock: number;
+      },
+    ) {
+      const key = `${itemId}:${customerName}`;
+      const existing = map.get(key);
+      if (existing) return existing;
+      const item = itemById.get(itemId);
+      const row: SummaryRow = {
+        key,
+        itemId,
+        code: item?.code ?? fallback?.code ?? "—",
+        name: item?.name ?? fallback?.name ?? "—",
+        size: item?.size ?? fallback?.size ?? null,
+        unit: item?.unit ?? fallback?.unit ?? "",
+        stockGudang: item?.stockGudang ?? fallback?.stockGudang ?? 0,
+        minStock: item?.minStock ?? fallback?.minStock ?? 0,
+        customer: customerName,
+        leaders: new Set<string>(),
+        delivered: 0,
+        used: 0,
+        returned: 0,
+        damaged: 0,
+      };
+      map.set(key, row);
+      return row;
+    }
+
+    for (const note of notes) {
+      if (!["CONFIRMED", "COMPLETED"].includes(note.status)) continue;
+      const customerName =
+        note.request.customer?.company ||
+        note.request.customer?.name ||
+        "Tanpa pelanggan";
+      for (const row of note.items) {
+        const entry = entryFor(row.itemId, customerName, row.item);
+        entry.delivered += row.qty;
+        entry.leaders.add(note.request.leader.name);
+      }
+    }
+
+    for (const turnover of turnovers) {
+      const note = noteById.get(turnover.deliveryNote.id);
+      if (!note) continue;
+      const customerName =
+        note.request.customer?.company ||
+        note.request.customer?.name ||
+        "Tanpa pelanggan";
+      for (const row of turnover.items) {
+        const entry = entryFor(row.itemId, customerName, row.item);
+        entry.used += row.used;
+        entry.returned += row.returned;
+        entry.damaged += row.damaged;
+        entry.leaders.add(turnover.submittedBy.name);
+      }
+    }
+
+    return Array.from(map.values()).sort(
+      (a, b) =>
+        a.code.localeCompare(b.code) || a.customer.localeCompare(b.customer),
+    );
+  }, [items, notes, turnovers]);
+
+  const exportSummary = () => {
+    const now = new Date();
+    const pad = (value: number) => String(value).padStart(2, "0");
+    downloadCsv(
+      `ringkasan-barang-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}.csv`,
+      [
+        ["Tanggal Export", formatDateTime(now)],
+        [],
+        [
+          "Kode",
+          "Barang",
+          "Ukuran",
+          "Satuan",
+          "Pelanggan",
+          "Leader",
+          "Dikirim",
+          "Terpakai",
+          "Kembali",
+          "Rusak",
+          "Stok Gudang",
+        ],
+        ...summaryRows.map((row) => [
+          row.code,
+          row.name,
+          row.size ?? "",
+          row.unit,
+          row.customer,
+          Array.from(row.leaders).join(", "),
+          row.delivered,
+          row.used,
+          row.returned,
+          row.damaged,
+          row.stockGudang,
+        ]),
+      ],
+    );
+  };
 
   const exportCsv = () => {
     const now = new Date();
@@ -150,11 +282,13 @@ export default function StockPage() {
             </Button>
             <Button
               size="sm"
-              onClick={exportCsv}
-              disabled={filtered.length === 0}
+              onClick={tab === "summary" ? exportSummary : exportCsv}
+              disabled={
+                tab === "summary" ? summaryRows.length === 0 : filtered.length === 0
+              }
             >
               <Download />
-              Ekspor Excel
+              Ekspor {tab === "summary" ? "Sheet" : "Excel"}
             </Button>
           </>
         }
@@ -184,6 +318,26 @@ export default function StockPage() {
         </StatCard>
       </div>
 
+      <Tabs value={tab} onValueChange={setTab} className="gap-4">
+        <TabsList className="h-auto flex-wrap justify-start gap-5 rounded-none bg-transparent p-0">
+          {[
+            ["stock", "Posisi Stok", items.length],
+            ["summary", "Ringkasan per Barang", summaryRows.length],
+          ].map(([value, label, count]) => (
+            <TabsTrigger
+              key={String(value)}
+              value={String(value)}
+              className="data-[state=active]:text-foreground text-muted-foreground data-[state=active]:border-foreground rounded-none border-0 border-b-2 border-transparent px-0 pb-2.5 text-[12.5px] data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+            >
+              {label}
+              <span className="bg-muted text-muted-foreground rounded-full px-1.5 py-0.5 text-[10.5px]">
+                {count}
+              </span>
+            </TabsTrigger>
+          ))}
+        </TabsList>
+
+        <TabsContent value="stock" className="flex flex-col gap-3">
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
         <div className="border-border flex min-w-[200px] flex-1 items-center gap-2 rounded-lg border px-3">
           <Search className="text-muted-foreground size-3.5" />
@@ -194,48 +348,46 @@ export default function StockPage() {
             className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
           />
         </div>
-        <Select value={category} onValueChange={setCategory}>
-          <SelectTrigger className="h-9 w-full text-xs sm:w-[170px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Semua kategori</SelectItem>
-            {categories.map((value) => (
-              <SelectItem key={value} value={value}>
-                {value}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-          <SelectTrigger className="h-9 w-full text-xs sm:w-[170px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Semua supplier</SelectItem>
-            {suppliers.map((supplier) => (
-              <SelectItem key={supplier.id} value={supplier.id}>
-                {supplier.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={stockFilter} onValueChange={setStockFilter}>
-          <SelectTrigger className="h-9 w-full text-xs sm:w-[150px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Semua stok</SelectItem>
-            <SelectItem value="SAFE">Aman</SelectItem>
-            <SelectItem value="LOW">Menipis</SelectItem>
-            <SelectItem value="EMPTY">Habis</SelectItem>
-          </SelectContent>
-        </Select>
+        <SearchableSelect
+          value={category}
+          onValueChange={setCategory}
+          searchPlaceholder="Cari kategori…"
+          options={[
+            { value: "ALL", label: "Semua kategori" },
+            ...categories.map((value) => ({ value, label: value })),
+          ]}
+          className="h-9 w-full text-xs sm:w-[170px]"
+        />
+        <SearchableSelect
+          value={supplierFilter}
+          onValueChange={setSupplierFilter}
+          searchPlaceholder="Cari supplier…"
+          options={[
+            { value: "ALL", label: "Semua supplier" },
+            ...suppliers.map((supplier) => ({
+              value: supplier.id,
+              label: supplier.name,
+            })),
+          ]}
+          className="h-9 w-full text-xs sm:w-[170px]"
+        />
+        <SearchableSelect
+          value={stockFilter}
+          onValueChange={setStockFilter}
+          searchPlaceholder="Cari status stok…"
+          options={[
+            { value: "ALL", label: "Semua stok" },
+            { value: "SAFE", label: "Aman" },
+            { value: "LOW", label: "Menipis" },
+            { value: "EMPTY", label: "Habis" },
+          ]}
+          className="h-9 w-full text-xs sm:w-[150px]"
+        />
       </div>
 
       <div className="bg-card border-border overflow-x-auto rounded-xl border">
         {isLoading ? (
-          <div className="p-6 text-sm">Memuat stok…</div>
+          <TableSkeleton rows={8} columns={7} />
         ) : filtered.length === 0 ? (
           <EmptyState
             title="Tidak ada item"
@@ -298,6 +450,78 @@ export default function StockPage() {
           {dataUpdatedAt ? formatDateTime(new Date(dataUpdatedAt)) : "—"}
         </span>
       </div>
+        </TabsContent>
+
+        <TabsContent value="summary" className="flex flex-col gap-3">
+          <div className="bg-card border-border overflow-x-auto rounded-xl border">
+            {summaryRows.length === 0 ? (
+              <EmptyState
+                title="Belum ada barang keluar"
+                description="Ringkasan terbentuk setelah surat jalan dikonfirmasi Admin."
+              />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/60">
+                    <TableHead>Barang</TableHead>
+                    <TableHead className="w-44">Pelanggan</TableHead>
+                    <TableHead className="w-40">Leader</TableHead>
+                    <TableHead className="w-20 text-right">Dikirim</TableHead>
+                    <TableHead className="w-20 text-right">Terpakai</TableHead>
+                    <TableHead className="w-20 text-right">Kembali</TableHead>
+                    <TableHead className="w-20 text-right">Rusak</TableHead>
+                    <TableHead className="w-24 text-right">Stok</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {summaryRows.map((row) => (
+                    <TableRow key={row.key}>
+                      <TableCell>
+                        <p className="text-xs font-medium">{row.name}</p>
+                        <p className="text-muted-foreground text-[10.5px]">
+                          {row.code} · {row.size ?? "—"} · {row.unit}
+                        </p>
+                      </TableCell>
+                      <TableCell className="text-xs">{row.customer}</TableCell>
+                      <TableCell className="text-muted-foreground text-xs">
+                        {Array.from(row.leaders).join(", ")}
+                      </TableCell>
+                      <TableCell className="text-right text-xs tabular-nums">
+                        {row.delivered}
+                      </TableCell>
+                      <TableCell className="text-right text-xs tabular-nums">
+                        {row.used}
+                      </TableCell>
+                      <TableCell className="text-right text-xs tabular-nums">
+                        {row.returned}
+                      </TableCell>
+                      <TableCell className="text-right text-xs tabular-nums">
+                        {row.damaged}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <StatusBadge
+                          status={
+                            row.stockGudang === 0
+                              ? "EMPTY"
+                              : row.stockGudang <= row.minStock
+                                ? "LOW"
+                                : "SAFE"
+                          }
+                          label={`${row.stockGudang} ${row.unit}`}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </div>
+          <p className="text-muted-foreground text-[11.5px]">
+            Satu baris = satu barang di satu pelanggan. Kolom dikirim, terpakai,
+            kembali, dan rusak dihitung dari surat jalan serta turnover.
+          </p>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

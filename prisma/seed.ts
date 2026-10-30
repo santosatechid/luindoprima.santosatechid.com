@@ -13,9 +13,15 @@ const prisma = new PrismaClient({
 const PASSWORD = "luindo123";
 
 const USERS = [
-  { name: "Rina Wulandari", email: "admin@luindoprima.co.id", role: "ADMIN" },
-  { name: "Dedi Anggara", email: "direktur@luindoprima.co.id", role: "DIREKTUR" },
-  { name: "Budi Santoso", email: "leader@luindoprima.co.id", role: "LEADER" },
+  { name: "Rina Wulandari", email: "admin@luindoprima.co.id", phone: null, role: "ADMIN" },
+  { name: "Dedi Anggara", email: "direktur@luindoprima.co.id", phone: null, role: "DIREKTUR" },
+  { name: "Budi Santoso", email: "leader@luindoprima.co.id", phone: null, role: "LEADER" },
+];
+
+const CUSTOMERS = [
+  { name: "PT Indonesia Power", company: "UP Suralaya", contact: "Andi", phone: "0812-1000-0001" },
+  { name: "PT PLN Nusantara Power", company: "UP Gresik", contact: "Rani", phone: "0812-1000-0002" },
+  { name: "PT Pertamina Hulu Energi", company: "PHE ONWJ", contact: "Dimas", phone: "0812-1000-0003" },
 ];
 
 const ITEMS = [
@@ -35,6 +41,16 @@ const SUPPLIERS = [
   { name: "CV Teknik Mandiri", contact: "Rudi", phone: "021-5550103", email: "admin@teknikmandiri.co.id" },
 ];
 
+async function nextEmployeeNo() {
+  let index = await prisma.user.count();
+  let candidate = `USR-${String(index + 1).padStart(4, "0")}`;
+  while (await prisma.user.findUnique({ where: { employeeNo: candidate } })) {
+    index += 1;
+    candidate = `USR-${String(index + 1).padStart(4, "0")}`;
+  }
+  return candidate;
+}
+
 async function main() {
   const password = await hashPassword(PASSWORD);
 
@@ -43,13 +59,20 @@ async function main() {
     const saved = existing
       ? await prisma.user.update({
           where: { id: existing.id },
-          data: { name: user.name, role: user.role, emailVerified: true },
+          data: {
+            name: user.name,
+            phone: user.phone,
+            role: user.role,
+            emailVerified: true,
+          },
         })
       : await prisma.user.create({
           data: {
             id: randomUUID(),
+            employeeNo: await nextEmployeeNo(),
             name: user.name,
             email: user.email,
+            phone: user.phone,
             role: user.role,
             emailVerified: true,
           },
@@ -71,6 +94,18 @@ async function main() {
     });
   }
 
+  for (const customer of CUSTOMERS) {
+    const existing = await prisma.customer.findFirst({
+      where: { name: customer.name },
+    });
+    if (!existing) {
+      const index = await prisma.customer.count();
+      await prisma.customer.create({
+        data: { ...customer, code: `CUST-${String(index + 1).padStart(4, "0")}` },
+      });
+    }
+  }
+
   for (const supplier of SUPPLIERS) {
     const existing = await prisma.supplier.findFirst({ where: { name: supplier.name } });
     if (!existing) await prisma.supplier.create({ data: supplier });
@@ -84,7 +119,9 @@ async function main() {
     });
   }
 
-  console.log(`Seed selesai: ${USERS.length} akun, ${SUPPLIERS.length} supplier, ${ITEMS.length} item.`);
+  console.log(
+    `Seed selesai: ${USERS.length} akun, ${CUSTOMERS.length} pelanggan, ${SUPPLIERS.length} supplier, ${ITEMS.length} item.`,
+  );
   console.log(`Login: admin@luindoprima.co.id / direktur@luindoprima.co.id / leader@luindoprima.co.id — sandi: ${PASSWORD}`);
 }
 

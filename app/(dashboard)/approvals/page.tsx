@@ -27,7 +27,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { useDashboard } from "@/hooks/inventory/useDashboard";
 import { useDecideRequest, useRequests } from "@/hooks/inventory/useRequests";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDateTime } from "@/lib/format";
 
 export default function ApprovalsPage() {
   const { data: rows = [] } = useRequests();
@@ -44,9 +44,10 @@ export default function ApprovalsPage() {
     (row) =>
       !query ||
       row.number.toLowerCase().includes(query) ||
-      row.jobNo.toLowerCase().includes(query) ||
+      row.poNo.toLowerCase().includes(query) ||
       row.site.toLowerCase().includes(query) ||
-      (row.customer ?? "").toLowerCase().includes(query) ||
+      (row.customer?.name ?? "").toLowerCase().includes(query) ||
+      (row.customer?.company ?? "").toLowerCase().includes(query) ||
       row.leader.name.toLowerCase().includes(query),
   );
   const selected =
@@ -144,9 +145,9 @@ export default function ApprovalsPage() {
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {[
                   ["Leader", selected.leader.name],
-                  ["Nomor pekerjaan", selected.jobNo],
+                  ["Nomor PO", selected.poNo],
+                  ["Pelanggan", selected.customer?.company ?? selected.customer?.name ?? "—"],
                   ["Site", selected.site],
-                  ["Dibutuhkan", formatDate(selected.neededAt)],
                 ].map(([label, value]) => (
                   <div key={label} className="bg-muted rounded-lg p-2.5">
                     <p className="text-muted-foreground text-[10.5px]">
@@ -162,7 +163,7 @@ export default function ApprovalsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Item</TableHead>
-                      <TableHead className="w-24">Diminta</TableHead>
+                      <TableHead className="w-36">Diminta</TableHead>
                       <TableHead className="w-28">Stok gudang</TableHead>
                       <TableHead className="w-32">
                         Sisa setelah keluar
@@ -183,7 +184,11 @@ export default function ApprovalsPage() {
                             <Input
                               type="number"
                               min={1}
-                              max={row.item.stockGudang}
+                              max={
+                                row.item.stockGudang -
+                                row.item.onRequest +
+                                row.qty
+                              }
                               value={qty[row.id] ?? row.qty}
                               onFocus={(event) => event.target.select()}
                               onChange={(event) =>
@@ -195,7 +200,7 @@ export default function ApprovalsPage() {
                                   ),
                                 }))
                               }
-                              className="h-8 w-16 text-xs"
+                              className="input-number h-8 w-20 px-2 text-xs"
                             />
                             <span className="text-muted-foreground text-[10.5px]">
                               {row.item.unit}
@@ -206,7 +211,10 @@ export default function ApprovalsPage() {
                           {row.item.stockGudang} {row.item.unit}
                         </TableCell>
                         <TableCell className="text-xs">
-                          {row.item.stockGudang - (qty[row.id] ?? row.qty)}{" "}
+                          {row.item.stockGudang -
+                            row.item.onRequest +
+                            row.qty -
+                            (qty[row.id] ?? row.qty)}{" "}
                           {row.item.unit}
                         </TableCell>
                       </TableRow>

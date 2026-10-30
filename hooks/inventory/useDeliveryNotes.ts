@@ -22,6 +22,7 @@ export const useCreateDeliveryNote = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["delivery-notes"] });
       queryClient.invalidateQueries({ queryKey: ["requests"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     },
   });
 };
@@ -41,6 +42,8 @@ export const useConfirmDeliveryNote = () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
       queryClient.invalidateQueries({ queryKey: ["requests"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      queryClient.invalidateQueries({ queryKey: ["turnovers"] });
     },
   });
 };

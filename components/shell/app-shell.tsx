@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import {
   Activity,
   Bell,
+  Building2,
   ClipboardCheck,
   ClipboardList,
   FileSpreadsheet,
@@ -97,6 +98,12 @@ const NAV: NavGroup[] = [
     title: "Data",
     items: [
       {
+        title: "Pelanggan",
+        url: "/customers",
+        icon: Building2,
+        roles: ["ADMIN", "DIREKTUR", "LEADER"],
+      },
+      {
         title: "Master Item & Supplier",
         url: "/items",
         icon: Package,
@@ -133,6 +140,7 @@ const TITLES: Record<string, string> = {
   "/delivery-notes": "Surat Jalan",
   "/turnover": "Turnover",
   "/inspections": "Progres Inspeksi",
+  "/customers": "Pelanggan",
   "/items": "Master Item & Supplier",
   "/stock": "Stok Inventory",
   "/reports": "Laporan",

@@ -1,4 +1,5 @@
 import { hashPassword } from "better-auth/crypto";
+import { headers } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
 import { bad, guard } from "@/lib/authGuard";
@@ -15,8 +16,10 @@ export async function GET() {
   const users = await prisma.user.findMany({
     select: {
       id: true,
+      employeeNo: true,
       name: true,
       email: true,
+      phone: true,
       role: true,
       banned: true,
       createdAt: true,
@@ -47,21 +50,38 @@ export async function POST(request: NextRequest) {
     });
     if (exists) return bad("Email sudah terdaftar.", 409);
 
-    const created = await auth.api.signUpEmail({
+    // Admin plugin membuat akun tanpa membuat sesi baru. signUpEmail() akan
+    // mengganti cookie sesi Admin dengan akun yang baru dibuat.
+    const created = await auth.api.createUser({
       body: {
         name: body.name,
         email: String(body.email).toLowerCase(),
         password: body.password,
+        role: body.role || "LEADER",
       },
+      headers: await headers(),
     });
+
+    let employeeNo = `USR-${String((await prisma.user.count()) + 1).padStart(4, "0")}`;
+    while (await prisma.user.findUnique({ where: { employeeNo } })) {
+      const next = Number(employeeNo.slice(4)) + 1;
+      employeeNo = `USR-${String(next).padStart(4, "0")}`;
+    }
 
     const user = await prisma.user.update({
       where: { id: created.user.id },
-      data: { role: body.role || "LEADER", emailVerified: true },
+      data: {
+        employeeNo,
+        phone: body.phone ? String(body.phone).trim() : null,
+        role: body.role || "LEADER",
+        emailVerified: true,
+      },
       select: {
         id: true,
+        employeeNo: true,
         name: true,
         email: true,
+        phone: true,
         role: true,
         banned: true,
         createdAt: true,
@@ -96,14 +116,22 @@ export async function PATCH(request: NextRequest) {
       data: {
         name: body.name,
         email: body.email ? String(body.email).toLowerCase() : undefined,
+        phone:
+          body.phone === undefined
+            ? undefined
+            : body.phone
+              ? String(body.phone).trim()
+              : null,
         role: body.role,
         banned: body.banned,
         banReason: body.banned === true ? "Dinonaktifkan Admin" : null,
       },
       select: {
         id: true,
+        employeeNo: true,
         name: true,
         email: true,
+        phone: true,
         role: true,
         banned: true,
         createdAt: true,

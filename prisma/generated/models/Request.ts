@@ -27,9 +27,9 @@ export type AggregateRequest = {
 export type RequestMinAggregateOutputType = {
   id: string | null
   number: string | null
-  jobNo: string | null
+  poNo: string | null
   site: string | null
-  customer: string | null
+  customerId: string | null
   neededAt: Date | null
   estimatedDoneAt: Date | null
   note: string | null
@@ -47,9 +47,9 @@ export type RequestMinAggregateOutputType = {
 export type RequestMaxAggregateOutputType = {
   id: string | null
   number: string | null
-  jobNo: string | null
+  poNo: string | null
   site: string | null
-  customer: string | null
+  customerId: string | null
   neededAt: Date | null
   estimatedDoneAt: Date | null
   note: string | null
@@ -67,9 +67,9 @@ export type RequestMaxAggregateOutputType = {
 export type RequestCountAggregateOutputType = {
   id: number
   number: number
-  jobNo: number
+  poNo: number
   site: number
-  customer: number
+  customerId: number
   neededAt: number
   estimatedDoneAt: number
   note: number
@@ -89,9 +89,9 @@ export type RequestCountAggregateOutputType = {
 export type RequestMinAggregateInputType = {
   id?: true
   number?: true
-  jobNo?: true
+  poNo?: true
   site?: true
-  customer?: true
+  customerId?: true
   neededAt?: true
   estimatedDoneAt?: true
   note?: true
@@ -109,9 +109,9 @@ export type RequestMinAggregateInputType = {
 export type RequestMaxAggregateInputType = {
   id?: true
   number?: true
-  jobNo?: true
+  poNo?: true
   site?: true
-  customer?: true
+  customerId?: true
   neededAt?: true
   estimatedDoneAt?: true
   note?: true
@@ -129,9 +129,9 @@ export type RequestMaxAggregateInputType = {
 export type RequestCountAggregateInputType = {
   id?: true
   number?: true
-  jobNo?: true
+  poNo?: true
   site?: true
-  customer?: true
+  customerId?: true
   neededAt?: true
   estimatedDoneAt?: true
   note?: true
@@ -222,9 +222,9 @@ export type RequestGroupByArgs<ExtArgs extends runtime.Types.Extensions.Internal
 export type RequestGroupByOutputType = {
   id: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer: string | null
+  customerId: string | null
   neededAt: Date
   estimatedDoneAt: Date | null
   note: string | null
@@ -263,9 +263,9 @@ export type RequestWhereInput = {
   NOT?: Prisma.RequestWhereInput | Prisma.RequestWhereInput[]
   id?: Prisma.StringFilter<"Request"> | string
   number?: Prisma.StringFilter<"Request"> | string
-  jobNo?: Prisma.StringFilter<"Request"> | string
+  poNo?: Prisma.StringFilter<"Request"> | string
   site?: Prisma.StringFilter<"Request"> | string
-  customer?: Prisma.StringNullableFilter<"Request"> | string | null
+  customerId?: Prisma.StringNullableFilter<"Request"> | string | null
   neededAt?: Prisma.DateTimeFilter<"Request"> | Date | string
   estimatedDoneAt?: Prisma.DateTimeNullableFilter<"Request"> | Date | string | null
   note?: Prisma.StringNullableFilter<"Request"> | string | null
@@ -281,6 +281,7 @@ export type RequestWhereInput = {
   leader?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   admin?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   director?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  customer?: Prisma.XOR<Prisma.CustomerNullableScalarRelationFilter, Prisma.CustomerWhereInput> | null
   items?: Prisma.RequestItemListRelationFilter
   delivery?: Prisma.XOR<Prisma.DeliveryNoteNullableScalarRelationFilter, Prisma.DeliveryNoteWhereInput> | null
 }
@@ -288,9 +289,9 @@ export type RequestWhereInput = {
 export type RequestOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   number?: Prisma.SortOrder
-  jobNo?: Prisma.SortOrder
+  poNo?: Prisma.SortOrder
   site?: Prisma.SortOrder
-  customer?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerId?: Prisma.SortOrderInput | Prisma.SortOrder
   neededAt?: Prisma.SortOrder
   estimatedDoneAt?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -306,6 +307,7 @@ export type RequestOrderByWithRelationInput = {
   leader?: Prisma.UserOrderByWithRelationInput
   admin?: Prisma.UserOrderByWithRelationInput
   director?: Prisma.UserOrderByWithRelationInput
+  customer?: Prisma.CustomerOrderByWithRelationInput
   items?: Prisma.RequestItemOrderByRelationAggregateInput
   delivery?: Prisma.DeliveryNoteOrderByWithRelationInput
 }
@@ -316,9 +318,9 @@ export type RequestWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.RequestWhereInput | Prisma.RequestWhereInput[]
   OR?: Prisma.RequestWhereInput[]
   NOT?: Prisma.RequestWhereInput | Prisma.RequestWhereInput[]
-  jobNo?: Prisma.StringFilter<"Request"> | string
+  poNo?: Prisma.StringFilter<"Request"> | string
   site?: Prisma.StringFilter<"Request"> | string
-  customer?: Prisma.StringNullableFilter<"Request"> | string | null
+  customerId?: Prisma.StringNullableFilter<"Request"> | string | null
   neededAt?: Prisma.DateTimeFilter<"Request"> | Date | string
   estimatedDoneAt?: Prisma.DateTimeNullableFilter<"Request"> | Date | string | null
   note?: Prisma.StringNullableFilter<"Request"> | string | null
@@ -334,6 +336,7 @@ export type RequestWhereUniqueInput = Prisma.AtLeast<{
   leader?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
   admin?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
   director?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  customer?: Prisma.XOR<Prisma.CustomerNullableScalarRelationFilter, Prisma.CustomerWhereInput> | null
   items?: Prisma.RequestItemListRelationFilter
   delivery?: Prisma.XOR<Prisma.DeliveryNoteNullableScalarRelationFilter, Prisma.DeliveryNoteWhereInput> | null
 }, "id" | "number">
@@ -341,9 +344,9 @@ export type RequestWhereUniqueInput = Prisma.AtLeast<{
 export type RequestOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   number?: Prisma.SortOrder
-  jobNo?: Prisma.SortOrder
+  poNo?: Prisma.SortOrder
   site?: Prisma.SortOrder
-  customer?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerId?: Prisma.SortOrderInput | Prisma.SortOrder
   neededAt?: Prisma.SortOrder
   estimatedDoneAt?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -367,9 +370,9 @@ export type RequestScalarWhereWithAggregatesInput = {
   NOT?: Prisma.RequestScalarWhereWithAggregatesInput | Prisma.RequestScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Request"> | string
   number?: Prisma.StringWithAggregatesFilter<"Request"> | string
-  jobNo?: Prisma.StringWithAggregatesFilter<"Request"> | string
+  poNo?: Prisma.StringWithAggregatesFilter<"Request"> | string
   site?: Prisma.StringWithAggregatesFilter<"Request"> | string
-  customer?: Prisma.StringNullableWithAggregatesFilter<"Request"> | string | null
+  customerId?: Prisma.StringNullableWithAggregatesFilter<"Request"> | string | null
   neededAt?: Prisma.DateTimeWithAggregatesFilter<"Request"> | Date | string
   estimatedDoneAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Request"> | Date | string | null
   note?: Prisma.StringNullableWithAggregatesFilter<"Request"> | string | null
@@ -387,9 +390,8 @@ export type RequestScalarWhereWithAggregatesInput = {
 export type RequestCreateInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -402,6 +404,7 @@ export type RequestCreateInput = {
   leader: Prisma.UserCreateNestedOneWithoutRequestsInput
   admin?: Prisma.UserCreateNestedOneWithoutAdminRequestsInput
   director?: Prisma.UserCreateNestedOneWithoutDirectorRequestsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutRequestsInput
   items?: Prisma.RequestItemCreateNestedManyWithoutRequestInput
   delivery?: Prisma.DeliveryNoteCreateNestedOneWithoutRequestInput
 }
@@ -409,9 +412,9 @@ export type RequestCreateInput = {
 export type RequestUncheckedCreateInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
+  customerId?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -431,9 +434,8 @@ export type RequestUncheckedCreateInput = {
 export type RequestUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -446,6 +448,7 @@ export type RequestUpdateInput = {
   leader?: Prisma.UserUpdateOneRequiredWithoutRequestsNestedInput
   admin?: Prisma.UserUpdateOneWithoutAdminRequestsNestedInput
   director?: Prisma.UserUpdateOneWithoutDirectorRequestsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutRequestsNestedInput
   items?: Prisma.RequestItemUpdateManyWithoutRequestNestedInput
   delivery?: Prisma.DeliveryNoteUpdateOneWithoutRequestNestedInput
 }
@@ -453,9 +456,9 @@ export type RequestUpdateInput = {
 export type RequestUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -475,9 +478,9 @@ export type RequestUncheckedUpdateInput = {
 export type RequestCreateManyInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
+  customerId?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -495,9 +498,8 @@ export type RequestCreateManyInput = {
 export type RequestUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -512,9 +514,9 @@ export type RequestUpdateManyMutationInput = {
 export type RequestUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -542,9 +544,9 @@ export type RequestOrderByRelationAggregateInput = {
 export type RequestCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   number?: Prisma.SortOrder
-  jobNo?: Prisma.SortOrder
+  poNo?: Prisma.SortOrder
   site?: Prisma.SortOrder
-  customer?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
   neededAt?: Prisma.SortOrder
   estimatedDoneAt?: Prisma.SortOrder
   note?: Prisma.SortOrder
@@ -562,9 +564,9 @@ export type RequestCountOrderByAggregateInput = {
 export type RequestMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   number?: Prisma.SortOrder
-  jobNo?: Prisma.SortOrder
+  poNo?: Prisma.SortOrder
   site?: Prisma.SortOrder
-  customer?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
   neededAt?: Prisma.SortOrder
   estimatedDoneAt?: Prisma.SortOrder
   note?: Prisma.SortOrder
@@ -582,9 +584,9 @@ export type RequestMaxOrderByAggregateInput = {
 export type RequestMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   number?: Prisma.SortOrder
-  jobNo?: Prisma.SortOrder
+  poNo?: Prisma.SortOrder
   site?: Prisma.SortOrder
-  customer?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
   neededAt?: Prisma.SortOrder
   estimatedDoneAt?: Prisma.SortOrder
   note?: Prisma.SortOrder
@@ -730,6 +732,48 @@ export type RequestUncheckedUpdateManyWithoutDirectorNestedInput = {
   deleteMany?: Prisma.RequestScalarWhereInput | Prisma.RequestScalarWhereInput[]
 }
 
+export type RequestCreateNestedManyWithoutCustomerInput = {
+  create?: Prisma.XOR<Prisma.RequestCreateWithoutCustomerInput, Prisma.RequestUncheckedCreateWithoutCustomerInput> | Prisma.RequestCreateWithoutCustomerInput[] | Prisma.RequestUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.RequestCreateOrConnectWithoutCustomerInput | Prisma.RequestCreateOrConnectWithoutCustomerInput[]
+  createMany?: Prisma.RequestCreateManyCustomerInputEnvelope
+  connect?: Prisma.RequestWhereUniqueInput | Prisma.RequestWhereUniqueInput[]
+}
+
+export type RequestUncheckedCreateNestedManyWithoutCustomerInput = {
+  create?: Prisma.XOR<Prisma.RequestCreateWithoutCustomerInput, Prisma.RequestUncheckedCreateWithoutCustomerInput> | Prisma.RequestCreateWithoutCustomerInput[] | Prisma.RequestUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.RequestCreateOrConnectWithoutCustomerInput | Prisma.RequestCreateOrConnectWithoutCustomerInput[]
+  createMany?: Prisma.RequestCreateManyCustomerInputEnvelope
+  connect?: Prisma.RequestWhereUniqueInput | Prisma.RequestWhereUniqueInput[]
+}
+
+export type RequestUpdateManyWithoutCustomerNestedInput = {
+  create?: Prisma.XOR<Prisma.RequestCreateWithoutCustomerInput, Prisma.RequestUncheckedCreateWithoutCustomerInput> | Prisma.RequestCreateWithoutCustomerInput[] | Prisma.RequestUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.RequestCreateOrConnectWithoutCustomerInput | Prisma.RequestCreateOrConnectWithoutCustomerInput[]
+  upsert?: Prisma.RequestUpsertWithWhereUniqueWithoutCustomerInput | Prisma.RequestUpsertWithWhereUniqueWithoutCustomerInput[]
+  createMany?: Prisma.RequestCreateManyCustomerInputEnvelope
+  set?: Prisma.RequestWhereUniqueInput | Prisma.RequestWhereUniqueInput[]
+  disconnect?: Prisma.RequestWhereUniqueInput | Prisma.RequestWhereUniqueInput[]
+  delete?: Prisma.RequestWhereUniqueInput | Prisma.RequestWhereUniqueInput[]
+  connect?: Prisma.RequestWhereUniqueInput | Prisma.RequestWhereUniqueInput[]
+  update?: Prisma.RequestUpdateWithWhereUniqueWithoutCustomerInput | Prisma.RequestUpdateWithWhereUniqueWithoutCustomerInput[]
+  updateMany?: Prisma.RequestUpdateManyWithWhereWithoutCustomerInput | Prisma.RequestUpdateManyWithWhereWithoutCustomerInput[]
+  deleteMany?: Prisma.RequestScalarWhereInput | Prisma.RequestScalarWhereInput[]
+}
+
+export type RequestUncheckedUpdateManyWithoutCustomerNestedInput = {
+  create?: Prisma.XOR<Prisma.RequestCreateWithoutCustomerInput, Prisma.RequestUncheckedCreateWithoutCustomerInput> | Prisma.RequestCreateWithoutCustomerInput[] | Prisma.RequestUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.RequestCreateOrConnectWithoutCustomerInput | Prisma.RequestCreateOrConnectWithoutCustomerInput[]
+  upsert?: Prisma.RequestUpsertWithWhereUniqueWithoutCustomerInput | Prisma.RequestUpsertWithWhereUniqueWithoutCustomerInput[]
+  createMany?: Prisma.RequestCreateManyCustomerInputEnvelope
+  set?: Prisma.RequestWhereUniqueInput | Prisma.RequestWhereUniqueInput[]
+  disconnect?: Prisma.RequestWhereUniqueInput | Prisma.RequestWhereUniqueInput[]
+  delete?: Prisma.RequestWhereUniqueInput | Prisma.RequestWhereUniqueInput[]
+  connect?: Prisma.RequestWhereUniqueInput | Prisma.RequestWhereUniqueInput[]
+  update?: Prisma.RequestUpdateWithWhereUniqueWithoutCustomerInput | Prisma.RequestUpdateWithWhereUniqueWithoutCustomerInput[]
+  updateMany?: Prisma.RequestUpdateManyWithWhereWithoutCustomerInput | Prisma.RequestUpdateManyWithWhereWithoutCustomerInput[]
+  deleteMany?: Prisma.RequestScalarWhereInput | Prisma.RequestScalarWhereInput[]
+}
+
 export type RequestCreateNestedOneWithoutItemsInput = {
   create?: Prisma.XOR<Prisma.RequestCreateWithoutItemsInput, Prisma.RequestUncheckedCreateWithoutItemsInput>
   connectOrCreate?: Prisma.RequestCreateOrConnectWithoutItemsInput
@@ -761,9 +805,8 @@ export type RequestUpdateOneRequiredWithoutDeliveryNestedInput = {
 export type RequestCreateWithoutLeaderInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -775,6 +818,7 @@ export type RequestCreateWithoutLeaderInput = {
   updatedAt?: Date | string
   admin?: Prisma.UserCreateNestedOneWithoutAdminRequestsInput
   director?: Prisma.UserCreateNestedOneWithoutDirectorRequestsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutRequestsInput
   items?: Prisma.RequestItemCreateNestedManyWithoutRequestInput
   delivery?: Prisma.DeliveryNoteCreateNestedOneWithoutRequestInput
 }
@@ -782,9 +826,9 @@ export type RequestCreateWithoutLeaderInput = {
 export type RequestUncheckedCreateWithoutLeaderInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
+  customerId?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -813,9 +857,8 @@ export type RequestCreateManyLeaderInputEnvelope = {
 export type RequestCreateWithoutAdminInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -827,6 +870,7 @@ export type RequestCreateWithoutAdminInput = {
   updatedAt?: Date | string
   leader: Prisma.UserCreateNestedOneWithoutRequestsInput
   director?: Prisma.UserCreateNestedOneWithoutDirectorRequestsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutRequestsInput
   items?: Prisma.RequestItemCreateNestedManyWithoutRequestInput
   delivery?: Prisma.DeliveryNoteCreateNestedOneWithoutRequestInput
 }
@@ -834,9 +878,9 @@ export type RequestCreateWithoutAdminInput = {
 export type RequestUncheckedCreateWithoutAdminInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
+  customerId?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -865,9 +909,8 @@ export type RequestCreateManyAdminInputEnvelope = {
 export type RequestCreateWithoutDirectorInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -879,6 +922,7 @@ export type RequestCreateWithoutDirectorInput = {
   updatedAt?: Date | string
   leader: Prisma.UserCreateNestedOneWithoutRequestsInput
   admin?: Prisma.UserCreateNestedOneWithoutAdminRequestsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutRequestsInput
   items?: Prisma.RequestItemCreateNestedManyWithoutRequestInput
   delivery?: Prisma.DeliveryNoteCreateNestedOneWithoutRequestInput
 }
@@ -886,9 +930,9 @@ export type RequestCreateWithoutDirectorInput = {
 export type RequestUncheckedCreateWithoutDirectorInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
+  customerId?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -936,9 +980,9 @@ export type RequestScalarWhereInput = {
   NOT?: Prisma.RequestScalarWhereInput | Prisma.RequestScalarWhereInput[]
   id?: Prisma.StringFilter<"Request"> | string
   number?: Prisma.StringFilter<"Request"> | string
-  jobNo?: Prisma.StringFilter<"Request"> | string
+  poNo?: Prisma.StringFilter<"Request"> | string
   site?: Prisma.StringFilter<"Request"> | string
-  customer?: Prisma.StringNullableFilter<"Request"> | string | null
+  customerId?: Prisma.StringNullableFilter<"Request"> | string | null
   neededAt?: Prisma.DateTimeFilter<"Request"> | Date | string
   estimatedDoneAt?: Prisma.DateTimeNullableFilter<"Request"> | Date | string | null
   note?: Prisma.StringNullableFilter<"Request"> | string | null
@@ -985,12 +1029,11 @@ export type RequestUpdateManyWithWhereWithoutDirectorInput = {
   data: Prisma.XOR<Prisma.RequestUpdateManyMutationInput, Prisma.RequestUncheckedUpdateManyWithoutDirectorInput>
 }
 
-export type RequestCreateWithoutItemsInput = {
+export type RequestCreateWithoutCustomerInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -1003,15 +1046,84 @@ export type RequestCreateWithoutItemsInput = {
   leader: Prisma.UserCreateNestedOneWithoutRequestsInput
   admin?: Prisma.UserCreateNestedOneWithoutAdminRequestsInput
   director?: Prisma.UserCreateNestedOneWithoutDirectorRequestsInput
+  items?: Prisma.RequestItemCreateNestedManyWithoutRequestInput
+  delivery?: Prisma.DeliveryNoteCreateNestedOneWithoutRequestInput
+}
+
+export type RequestUncheckedCreateWithoutCustomerInput = {
+  id?: string
+  number: string
+  poNo: string
+  site: string
+  neededAt: Date | string
+  estimatedDoneAt?: Date | string | null
+  note?: string | null
+  status?: string
+  leaderId: string
+  adminId?: string | null
+  directorId?: string | null
+  adminNote?: string | null
+  directorNote?: string | null
+  decidedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.RequestItemUncheckedCreateNestedManyWithoutRequestInput
+  delivery?: Prisma.DeliveryNoteUncheckedCreateNestedOneWithoutRequestInput
+}
+
+export type RequestCreateOrConnectWithoutCustomerInput = {
+  where: Prisma.RequestWhereUniqueInput
+  create: Prisma.XOR<Prisma.RequestCreateWithoutCustomerInput, Prisma.RequestUncheckedCreateWithoutCustomerInput>
+}
+
+export type RequestCreateManyCustomerInputEnvelope = {
+  data: Prisma.RequestCreateManyCustomerInput | Prisma.RequestCreateManyCustomerInput[]
+  skipDuplicates?: boolean
+}
+
+export type RequestUpsertWithWhereUniqueWithoutCustomerInput = {
+  where: Prisma.RequestWhereUniqueInput
+  update: Prisma.XOR<Prisma.RequestUpdateWithoutCustomerInput, Prisma.RequestUncheckedUpdateWithoutCustomerInput>
+  create: Prisma.XOR<Prisma.RequestCreateWithoutCustomerInput, Prisma.RequestUncheckedCreateWithoutCustomerInput>
+}
+
+export type RequestUpdateWithWhereUniqueWithoutCustomerInput = {
+  where: Prisma.RequestWhereUniqueInput
+  data: Prisma.XOR<Prisma.RequestUpdateWithoutCustomerInput, Prisma.RequestUncheckedUpdateWithoutCustomerInput>
+}
+
+export type RequestUpdateManyWithWhereWithoutCustomerInput = {
+  where: Prisma.RequestScalarWhereInput
+  data: Prisma.XOR<Prisma.RequestUpdateManyMutationInput, Prisma.RequestUncheckedUpdateManyWithoutCustomerInput>
+}
+
+export type RequestCreateWithoutItemsInput = {
+  id?: string
+  number: string
+  poNo: string
+  site: string
+  neededAt: Date | string
+  estimatedDoneAt?: Date | string | null
+  note?: string | null
+  status?: string
+  adminNote?: string | null
+  directorNote?: string | null
+  decidedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  leader: Prisma.UserCreateNestedOneWithoutRequestsInput
+  admin?: Prisma.UserCreateNestedOneWithoutAdminRequestsInput
+  director?: Prisma.UserCreateNestedOneWithoutDirectorRequestsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutRequestsInput
   delivery?: Prisma.DeliveryNoteCreateNestedOneWithoutRequestInput
 }
 
 export type RequestUncheckedCreateWithoutItemsInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
+  customerId?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -1046,9 +1158,8 @@ export type RequestUpdateToOneWithWhereWithoutItemsInput = {
 export type RequestUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1061,15 +1172,16 @@ export type RequestUpdateWithoutItemsInput = {
   leader?: Prisma.UserUpdateOneRequiredWithoutRequestsNestedInput
   admin?: Prisma.UserUpdateOneWithoutAdminRequestsNestedInput
   director?: Prisma.UserUpdateOneWithoutDirectorRequestsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutRequestsNestedInput
   delivery?: Prisma.DeliveryNoteUpdateOneWithoutRequestNestedInput
 }
 
 export type RequestUncheckedUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1088,9 +1200,8 @@ export type RequestUncheckedUpdateWithoutItemsInput = {
 export type RequestCreateWithoutDeliveryInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -1103,15 +1214,16 @@ export type RequestCreateWithoutDeliveryInput = {
   leader: Prisma.UserCreateNestedOneWithoutRequestsInput
   admin?: Prisma.UserCreateNestedOneWithoutAdminRequestsInput
   director?: Prisma.UserCreateNestedOneWithoutDirectorRequestsInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutRequestsInput
   items?: Prisma.RequestItemCreateNestedManyWithoutRequestInput
 }
 
 export type RequestUncheckedCreateWithoutDeliveryInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
+  customerId?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -1146,9 +1258,8 @@ export type RequestUpdateToOneWithWhereWithoutDeliveryInput = {
 export type RequestUpdateWithoutDeliveryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1161,15 +1272,16 @@ export type RequestUpdateWithoutDeliveryInput = {
   leader?: Prisma.UserUpdateOneRequiredWithoutRequestsNestedInput
   admin?: Prisma.UserUpdateOneWithoutAdminRequestsNestedInput
   director?: Prisma.UserUpdateOneWithoutDirectorRequestsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutRequestsNestedInput
   items?: Prisma.RequestItemUpdateManyWithoutRequestNestedInput
 }
 
 export type RequestUncheckedUpdateWithoutDeliveryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1188,9 +1300,9 @@ export type RequestUncheckedUpdateWithoutDeliveryInput = {
 export type RequestCreateManyLeaderInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
+  customerId?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -1207,9 +1319,9 @@ export type RequestCreateManyLeaderInput = {
 export type RequestCreateManyAdminInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
+  customerId?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -1226,9 +1338,9 @@ export type RequestCreateManyAdminInput = {
 export type RequestCreateManyDirectorInput = {
   id?: string
   number: string
-  jobNo: string
+  poNo: string
   site: string
-  customer?: string | null
+  customerId?: string | null
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
@@ -1245,9 +1357,8 @@ export type RequestCreateManyDirectorInput = {
 export type RequestUpdateWithoutLeaderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1259,6 +1370,7 @@ export type RequestUpdateWithoutLeaderInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   admin?: Prisma.UserUpdateOneWithoutAdminRequestsNestedInput
   director?: Prisma.UserUpdateOneWithoutDirectorRequestsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutRequestsNestedInput
   items?: Prisma.RequestItemUpdateManyWithoutRequestNestedInput
   delivery?: Prisma.DeliveryNoteUpdateOneWithoutRequestNestedInput
 }
@@ -1266,9 +1378,9 @@ export type RequestUpdateWithoutLeaderInput = {
 export type RequestUncheckedUpdateWithoutLeaderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1287,9 +1399,9 @@ export type RequestUncheckedUpdateWithoutLeaderInput = {
 export type RequestUncheckedUpdateManyWithoutLeaderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1306,9 +1418,8 @@ export type RequestUncheckedUpdateManyWithoutLeaderInput = {
 export type RequestUpdateWithoutAdminInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1320,6 +1431,7 @@ export type RequestUpdateWithoutAdminInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   leader?: Prisma.UserUpdateOneRequiredWithoutRequestsNestedInput
   director?: Prisma.UserUpdateOneWithoutDirectorRequestsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutRequestsNestedInput
   items?: Prisma.RequestItemUpdateManyWithoutRequestNestedInput
   delivery?: Prisma.DeliveryNoteUpdateOneWithoutRequestNestedInput
 }
@@ -1327,9 +1439,9 @@ export type RequestUpdateWithoutAdminInput = {
 export type RequestUncheckedUpdateWithoutAdminInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1348,9 +1460,9 @@ export type RequestUncheckedUpdateWithoutAdminInput = {
 export type RequestUncheckedUpdateManyWithoutAdminInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1367,9 +1479,8 @@ export type RequestUncheckedUpdateManyWithoutAdminInput = {
 export type RequestUpdateWithoutDirectorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1381,6 +1492,7 @@ export type RequestUpdateWithoutDirectorInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   leader?: Prisma.UserUpdateOneRequiredWithoutRequestsNestedInput
   admin?: Prisma.UserUpdateOneWithoutAdminRequestsNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutRequestsNestedInput
   items?: Prisma.RequestItemUpdateManyWithoutRequestNestedInput
   delivery?: Prisma.DeliveryNoteUpdateOneWithoutRequestNestedInput
 }
@@ -1388,9 +1500,9 @@ export type RequestUpdateWithoutDirectorInput = {
 export type RequestUncheckedUpdateWithoutDirectorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1409,15 +1521,95 @@ export type RequestUncheckedUpdateWithoutDirectorInput = {
 export type RequestUncheckedUpdateManyWithoutDirectorInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
-  jobNo?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
   site?: Prisma.StringFieldUpdateOperationsInput | string
-  customer?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RequestCreateManyCustomerInput = {
+  id?: string
+  number: string
+  poNo: string
+  site: string
+  neededAt: Date | string
+  estimatedDoneAt?: Date | string | null
+  note?: string | null
+  status?: string
+  leaderId: string
+  adminId?: string | null
+  directorId?: string | null
+  adminNote?: string | null
+  directorNote?: string | null
+  decidedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type RequestUpdateWithoutCustomerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  number?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
+  site?: Prisma.StringFieldUpdateOperationsInput | string
+  neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  leader?: Prisma.UserUpdateOneRequiredWithoutRequestsNestedInput
+  admin?: Prisma.UserUpdateOneWithoutAdminRequestsNestedInput
+  director?: Prisma.UserUpdateOneWithoutDirectorRequestsNestedInput
+  items?: Prisma.RequestItemUpdateManyWithoutRequestNestedInput
+  delivery?: Prisma.DeliveryNoteUpdateOneWithoutRequestNestedInput
+}
+
+export type RequestUncheckedUpdateWithoutCustomerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  number?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
+  site?: Prisma.StringFieldUpdateOperationsInput | string
+  neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.RequestItemUncheckedUpdateManyWithoutRequestNestedInput
+  delivery?: Prisma.DeliveryNoteUncheckedUpdateOneWithoutRequestNestedInput
+}
+
+export type RequestUncheckedUpdateManyWithoutCustomerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  number?: Prisma.StringFieldUpdateOperationsInput | string
+  poNo?: Prisma.StringFieldUpdateOperationsInput | string
+  site?: Prisma.StringFieldUpdateOperationsInput | string
+  neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  leaderId?: Prisma.StringFieldUpdateOperationsInput | string
+  adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  directorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1459,9 +1651,9 @@ export type RequestCountOutputTypeCountItemsArgs<ExtArgs extends runtime.Types.E
 export type RequestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   number?: boolean
-  jobNo?: boolean
+  poNo?: boolean
   site?: boolean
-  customer?: boolean
+  customerId?: boolean
   neededAt?: boolean
   estimatedDoneAt?: boolean
   note?: boolean
@@ -1477,6 +1669,7 @@ export type RequestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   leader?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   admin?: boolean | Prisma.Request$adminArgs<ExtArgs>
   director?: boolean | Prisma.Request$directorArgs<ExtArgs>
+  customer?: boolean | Prisma.Request$customerArgs<ExtArgs>
   items?: boolean | Prisma.Request$itemsArgs<ExtArgs>
   delivery?: boolean | Prisma.Request$deliveryArgs<ExtArgs>
   _count?: boolean | Prisma.RequestCountOutputTypeDefaultArgs<ExtArgs>
@@ -1485,9 +1678,9 @@ export type RequestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
 export type RequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   number?: boolean
-  jobNo?: boolean
+  poNo?: boolean
   site?: boolean
-  customer?: boolean
+  customerId?: boolean
   neededAt?: boolean
   estimatedDoneAt?: boolean
   note?: boolean
@@ -1503,14 +1696,15 @@ export type RequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   leader?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   admin?: boolean | Prisma.Request$adminArgs<ExtArgs>
   director?: boolean | Prisma.Request$directorArgs<ExtArgs>
+  customer?: boolean | Prisma.Request$customerArgs<ExtArgs>
 }, ExtArgs["result"]["request"]>
 
 export type RequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   number?: boolean
-  jobNo?: boolean
+  poNo?: boolean
   site?: boolean
-  customer?: boolean
+  customerId?: boolean
   neededAt?: boolean
   estimatedDoneAt?: boolean
   note?: boolean
@@ -1526,14 +1720,15 @@ export type RequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   leader?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   admin?: boolean | Prisma.Request$adminArgs<ExtArgs>
   director?: boolean | Prisma.Request$directorArgs<ExtArgs>
+  customer?: boolean | Prisma.Request$customerArgs<ExtArgs>
 }, ExtArgs["result"]["request"]>
 
 export type RequestSelectScalar = {
   id?: boolean
   number?: boolean
-  jobNo?: boolean
+  poNo?: boolean
   site?: boolean
-  customer?: boolean
+  customerId?: boolean
   neededAt?: boolean
   estimatedDoneAt?: boolean
   note?: boolean
@@ -1548,11 +1743,12 @@ export type RequestSelectScalar = {
   updatedAt?: boolean
 }
 
-export type RequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "jobNo" | "site" | "customer" | "neededAt" | "estimatedDoneAt" | "note" | "status" | "leaderId" | "adminId" | "directorId" | "adminNote" | "directorNote" | "decidedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["request"]>
+export type RequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "poNo" | "site" | "customerId" | "neededAt" | "estimatedDoneAt" | "note" | "status" | "leaderId" | "adminId" | "directorId" | "adminNote" | "directorNote" | "decidedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["request"]>
 export type RequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   leader?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   admin?: boolean | Prisma.Request$adminArgs<ExtArgs>
   director?: boolean | Prisma.Request$directorArgs<ExtArgs>
+  customer?: boolean | Prisma.Request$customerArgs<ExtArgs>
   items?: boolean | Prisma.Request$itemsArgs<ExtArgs>
   delivery?: boolean | Prisma.Request$deliveryArgs<ExtArgs>
   _count?: boolean | Prisma.RequestCountOutputTypeDefaultArgs<ExtArgs>
@@ -1561,11 +1757,13 @@ export type RequestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   leader?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   admin?: boolean | Prisma.Request$adminArgs<ExtArgs>
   director?: boolean | Prisma.Request$directorArgs<ExtArgs>
+  customer?: boolean | Prisma.Request$customerArgs<ExtArgs>
 }
 export type RequestIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   leader?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   admin?: boolean | Prisma.Request$adminArgs<ExtArgs>
   director?: boolean | Prisma.Request$directorArgs<ExtArgs>
+  customer?: boolean | Prisma.Request$customerArgs<ExtArgs>
 }
 
 export type $RequestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1574,15 +1772,16 @@ export type $RequestPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     leader: Prisma.$UserPayload<ExtArgs>
     admin: Prisma.$UserPayload<ExtArgs> | null
     director: Prisma.$UserPayload<ExtArgs> | null
+    customer: Prisma.$CustomerPayload<ExtArgs> | null
     items: Prisma.$RequestItemPayload<ExtArgs>[]
     delivery: Prisma.$DeliveryNotePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     number: string
-    jobNo: string
+    poNo: string
     site: string
-    customer: string | null
+    customerId: string | null
     neededAt: Date
     estimatedDoneAt: Date | null
     note: string | null
@@ -1992,6 +2191,7 @@ export interface Prisma__RequestClient<T, Null = never, ExtArgs extends runtime.
   leader<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   admin<T extends Prisma.Request$adminArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Request$adminArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   director<T extends Prisma.Request$directorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Request$directorArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  customer<T extends Prisma.Request$customerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Request$customerArgs<ExtArgs>>): Prisma.Prisma__CustomerClient<runtime.Types.Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.Request$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Request$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RequestItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   delivery<T extends Prisma.Request$deliveryArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Request$deliveryArgs<ExtArgs>>): Prisma.Prisma__DeliveryNoteClient<runtime.Types.Result.GetResult<Prisma.$DeliveryNotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
@@ -2025,9 +2225,9 @@ export interface Prisma__RequestClient<T, Null = never, ExtArgs extends runtime.
 export interface RequestFieldRefs {
   readonly id: Prisma.FieldRef<"Request", 'String'>
   readonly number: Prisma.FieldRef<"Request", 'String'>
-  readonly jobNo: Prisma.FieldRef<"Request", 'String'>
+  readonly poNo: Prisma.FieldRef<"Request", 'String'>
   readonly site: Prisma.FieldRef<"Request", 'String'>
-  readonly customer: Prisma.FieldRef<"Request", 'String'>
+  readonly customerId: Prisma.FieldRef<"Request", 'String'>
   readonly neededAt: Prisma.FieldRef<"Request", 'DateTime'>
   readonly estimatedDoneAt: Prisma.FieldRef<"Request", 'DateTime'>
   readonly note: Prisma.FieldRef<"Request", 'String'>
@@ -2476,6 +2676,25 @@ export type Request$directorArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * Request.customer
+ */
+export type Request$customerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Customer
+   */
+  select?: Prisma.CustomerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Customer
+   */
+  omit?: Prisma.CustomerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CustomerInclude<ExtArgs> | null
+  where?: Prisma.CustomerWhereInput
 }
 
 /**

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { PageHeader } from "@/components/shell/page-header";
 import { DateRangePicker } from "@/components/common/date-range-picker";
+import { TableSkeleton } from "@/components/shell/loading-state";
 import { EmptyState, StatCard } from "@/components/shell/stat-card";
 import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
@@ -19,13 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Table,
   TableBody,
@@ -40,12 +35,11 @@ import {
   useDeliveryNotes,
 } from "@/hooks/inventory/useDeliveryNotes";
 import { useRequests } from "@/hooks/inventory/useRequests";
-import { downloadCsv } from "@/lib/csv";
 import { formatDate, inRange, uniqueValues } from "@/lib/format";
 import { authClient } from "@/services/auth/authClients";
 
 export default function DeliveryNotesPage() {
-  const { data: rows = [] } = useDeliveryNotes();
+  const { data: rows = [], isLoading } = useDeliveryNotes();
   const { data: requests = [] } = useRequests();
   const createNote = useCreateDeliveryNote();
   const confirmNote = useConfirmDeliveryNote();
@@ -63,22 +57,25 @@ export default function DeliveryNotesPage() {
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
 
-  const customers = uniqueValues(rows.map((row) => row.request.customer));
+  const customers = uniqueValues(
+    rows.map((row) => row.request.customer?.name),
+  );
   const query = search.trim().toLowerCase();
   const filtered = rows.filter((row) => {
     const matchesSearch =
       !query ||
       row.number.toLowerCase().includes(query) ||
-      row.request.jobNo.toLowerCase().includes(query) ||
+      row.request.poNo.toLowerCase().includes(query) ||
       row.request.site.toLowerCase().includes(query) ||
       row.request.leader.name.toLowerCase().includes(query) ||
-      (row.request.customer ?? "").toLowerCase().includes(query) ||
+      (row.request.customer?.name ?? "").toLowerCase().includes(query) ||
+      (row.request.customer?.company ?? "").toLowerCase().includes(query) ||
       row.items.some((item) => item.item.name.toLowerCase().includes(query));
     return (
       matchesSearch &&
       (statusFilter === "ALL" || row.status === statusFilter) &&
       (customerFilter === "ALL" ||
-        row.request.customer === customerFilter) &&
+        row.request.customer?.name === customerFilter) &&
       inRange(row.issuedAt, dateFrom, dateTo)
     );
   });
@@ -138,18 +135,18 @@ export default function DeliveryNotesPage() {
                       <Label className="text-[11.5px]">
                         Request yang disetujui
                       </Label>
-                      <Select value={requestId} onValueChange={setRequestId}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Pilih request" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {approved.map((row) => (
-                            <SelectItem key={row.id} value={row.id}>
-                              {row.number} · {row.site} · {row.leader.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <SearchableSelect
+                        value={requestId}
+                        onValueChange={setRequestId}
+                        placeholder="Pilih request"
+                        searchPlaceholder="Cari nomor, site, atau leader…"
+                        options={approved.map((row) => ({
+                          value: row.id,
+                          label: `${row.number} · ${row.site}`,
+                          hint: row.leader.name,
+                        }))}
+                        className="w-full"
+                      />
                       {approved.length === 0 ? (
                         <p className="text-muted-foreground text-[10.5px]">
                           Belum ada request disetujui tanpa surat jalan.
@@ -228,30 +225,31 @@ export default function DeliveryNotesPage() {
                 className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="h-9 w-full text-xs sm:w-[150px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Semua status</SelectItem>
-                <SelectItem value="ISSUED">Diterbitkan</SelectItem>
-                <SelectItem value="CONFIRMED">Dibawa</SelectItem>
-                <SelectItem value="COMPLETED">Selesai</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={customerFilter} onValueChange={setCustomerFilter}>
-              <SelectTrigger className="h-9 w-full text-xs sm:w-[170px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Semua pelanggan</SelectItem>
-                {customers.map((customer) => (
-                  <SelectItem key={customer} value={customer}>
-                    {customer}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={statusFilter}
+              onValueChange={setStatusFilter}
+              searchPlaceholder="Cari status…"
+              options={[
+                { value: "ALL", label: "Semua status" },
+                { value: "ISSUED", label: "Diterbitkan" },
+                { value: "CONFIRMED", label: "Dibawa" },
+                { value: "COMPLETED", label: "Selesai" },
+              ]}
+              className="h-9 w-full text-xs sm:w-[150px]"
+            />
+            <SearchableSelect
+              value={customerFilter}
+              onValueChange={setCustomerFilter}
+              searchPlaceholder="Cari pelanggan…"
+              options={[
+                { value: "ALL", label: "Semua pelanggan" },
+                ...customers.map((customer) => ({
+                  value: customer,
+                  label: customer,
+                })),
+              ]}
+              className="h-9 w-full text-xs sm:w-[170px]"
+            />
             <DateRangePicker
               from={dateFrom}
               to={dateTo}
@@ -263,7 +261,9 @@ export default function DeliveryNotesPage() {
             />
           </div>
 
-          {filtered.length === 0 ? (
+          {isLoading ? (
+            <TableSkeleton rows={5} columns={6} />
+          ) : filtered.length === 0 ? (
             <EmptyState
               title="Belum ada surat jalan"
               description="Terbitkan dari request yang telah disetujui Direktur."
@@ -284,13 +284,19 @@ export default function DeliveryNotesPage() {
                 {filtered.map((row) => (
                   <TableRow
                     key={row.id}
-                    className="cursor-pointer"
+                    className={`cursor-pointer transition-colors ${
+                      row.status === "ISSUED"
+                        ? "bg-info-surface hover:bg-info-chip"
+                        : row.status === "CONFIRMED"
+                          ? "bg-warning-surface hover:bg-warning-chip"
+                          : "bg-success-surface hover:bg-success-chip"
+                    }`}
                     onClick={() => setSelectedId(row.id)}
                   >
                     <TableCell>
                       <p className="text-xs font-medium">{row.number}</p>
                       <p className="text-muted-foreground text-[10.5px]">
-                        {row.request.jobNo}
+                        PO {row.request.poNo} · {row.request.customer?.name ?? "—"}
                       </p>
                     </TableCell>
                     <TableCell className="text-muted-foreground text-xs">
@@ -327,9 +333,23 @@ export default function DeliveryNotesPage() {
 
             <div className="border-border flex flex-col gap-2 rounded-lg border p-3 text-[11px]">
               <div className="flex justify-between gap-3">
-                <span className="text-muted-foreground">Pekerjaan</span>
+                <span className="text-muted-foreground">Nomor PO</span>
                 <span className="text-right font-medium">
-                  {selected.request.jobNo} · {selected.request.site}
+                  {selected.request.poNo}
+                </span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">Pelanggan</span>
+                <span className="text-right font-medium">
+                  {selected.request.customer?.company ??
+                    selected.request.customer?.name ??
+                    "—"}
+                </span>
+              </div>
+              <div className="flex justify-between gap-3">
+                <span className="text-muted-foreground">Site</span>
+                <span className="text-right font-medium">
+                  {selected.request.site}
                 </span>
               </div>
               <div className="flex justify-between gap-3">
@@ -399,21 +419,14 @@ export default function DeliveryNotesPage() {
               </Button>
             ) : null}
 
-            <Button
-              variant="outline"
-              onClick={() =>
-                downloadCsv(`${selected.number}.csv`, [
-                  ["Item", "Jumlah", "Satuan"],
-                  ...selected.items.map((row) => [
-                    row.item.name,
-                    row.qty,
-                    row.item.unit,
-                  ]),
-                ])
-              }
-            >
-              <Download />
-              Unduh Surat Jalan
+            <Button variant="outline" asChild>
+              <a
+                href={`/api/delivery-notes/${selected.id}/pdf`}
+                download={`${selected.number}.pdf`}
+              >
+                <Download />
+                Unduh PDF Resmi
+              </a>
             </Button>
           </div>
         ) : null}

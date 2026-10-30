@@ -9,13 +9,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Table,
   TableBody,
@@ -25,6 +19,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { useCustomers } from "@/hooks/inventory/useCustomers";
 import { useItems } from "@/hooks/inventory/useItems";
 import { useCreateRequest } from "@/hooks/inventory/useRequests";
 import { formatDate, todayInput } from "@/lib/format";
@@ -34,11 +29,12 @@ type Row = { itemId: string; qty: string };
 export default function NewRequestPage() {
   const router = useRouter();
   const { data: items = [] } = useItems();
+  const { data: customers = [] } = useCustomers();
   const createRequest = useCreateRequest();
 
-  const [jobNo, setJobNo] = useState("");
+  const [poNo, setPoNo] = useState("");
   const [site, setSite] = useState("");
-  const [customer, setCustomer] = useState("");
+  const [customerId, setCustomerId] = useState("");
   const [neededAt, setNeededAt] = useState(todayInput());
   const [estimatedDoneAt, setEstimatedDoneAt] = useState("");
   const [note, setNote] = useState("");
@@ -61,19 +57,32 @@ export default function NewRequestPage() {
   }
 
   async function submit() {
-    if (!jobNo || !site || !neededAt || chosen.length === 0) {
-      toast.error("Nomor pekerjaan, site, tanggal, dan minimal satu item wajib diisi.");
+    if (!poNo || !site || !neededAt || !customerId || chosen.length === 0) {
+      toast.error(
+        "Nomor PO, pelanggan, site, tanggal, dan minimal satu item wajib diisi.",
+      );
       return;
     }
     if (chosen.some((row) => Number(row.qty) <= 0)) {
       toast.error("Jumlah item harus lebih dari nol.");
       return;
     }
+    for (const row of chosen) {
+      const item = items.find((entry) => entry.id === row.itemId);
+      if (!item) continue;
+      const available = item.stockGudang - item.onRequest;
+      if (Number(row.qty) > available) {
+        toast.error(
+          `Stok ${item.name} tidak cukup. Tersedia ${available} ${item.unit}.`,
+        );
+        return;
+      }
+    }
 
     await createRequest.mutateAsync({
-      jobNo,
+      poNo,
       site,
-      customer: customer || undefined,
+      customerId,
       neededAt,
       estimatedDoneAt: estimatedDoneAt || undefined,
       note: note || undefined,
@@ -126,11 +135,11 @@ export default function NewRequestPage() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
-                <Label className="text-[11.5px]">Nomor pekerjaan</Label>
+                <Label className="text-[11.5px]">Nomor PO pelanggan</Label>
                 <Input
-                  value={jobNo}
-                  placeholder="JOB-2026-0431"
-                  onChange={(event) => setJobNo(event.target.value)}
+                  value={poNo}
+                  placeholder="PO/2026/0431"
+                  onChange={(event) => setPoNo(event.target.value)}
                 />
               </div>
               <div className="grid gap-1.5">
@@ -143,11 +152,25 @@ export default function NewRequestPage() {
               </div>
               <div className="grid gap-1.5">
                 <Label className="text-[11.5px]">Pelanggan</Label>
-                <Input
-                  value={customer}
-                  placeholder="PT Indonesia Power"
-                  onChange={(event) => setCustomer(event.target.value)}
+                <SearchableSelect
+                  value={customerId}
+                  onValueChange={setCustomerId}
+                  placeholder="Pilih pelanggan"
+                  searchPlaceholder="Cari nama pelanggan…"
+                  options={customers
+                    .filter((customer) => customer.isActive)
+                    .map((customer) => ({
+                      value: customer.id,
+                      label: customer.name,
+                      hint: customer.company ?? undefined,
+                    }))}
+                  className="w-full"
                 />
+                {customers.length === 0 ? (
+                  <p className="text-muted-foreground text-[10.5px]">
+                    Belum ada pelanggan. Minta Admin menambah data pelanggan.
+                  </p>
+                ) : null}
               </div>
               <div className="grid gap-1.5">
                 <Label className="text-[11.5px]">Tanggal dibutuhkan</Label>
@@ -184,7 +207,8 @@ export default function NewRequestPage() {
             <div>
               <p className="text-[13.5px] font-semibold">Item yang Diminta</p>
               <p className="text-muted-foreground text-[11.5px]">
-                {chosen.length} item dipilih · stok tersedia dicek Admin.
+                {chosen.length} item dipilih · tersedia = stok gudang − yang
+                sedang diminta.
               </p>
             </div>
 
@@ -193,7 +217,9 @@ export default function NewRequestPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Item</TableHead>
-                    <TableHead className="w-24">Stok</TableHead>
+                    <TableHead className="w-20">Stok</TableHead>
+                    <TableHead className="w-24">Di request</TableHead>
+                    <TableHead className="w-24">Tersedia</TableHead>
                     <TableHead className="w-28">Jumlah</TableHead>
                     <TableHead className="w-16" />
                   </TableRow>
@@ -202,7 +228,7 @@ export default function NewRequestPage() {
                   {chosen.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={4}
+                        colSpan={6}
                         className="text-muted-foreground py-6 text-center text-xs"
                       >
                         Belum ada item dipilih.
@@ -223,10 +249,17 @@ export default function NewRequestPage() {
                           <TableCell className="text-xs">
                             {item.stockGudang} {item.unit}
                           </TableCell>
+                          <TableCell className="text-muted-foreground text-xs">
+                            {item.onRequest} {item.unit}
+                          </TableCell>
+                          <TableCell className="text-xs font-medium">
+                            {item.stockGudang - item.onRequest} {item.unit}
+                          </TableCell>
                           <TableCell>
                             <Input
                               type="number"
                               min={1}
+                              max={item.stockGudang - item.onRequest}
                               value={row.qty}
                               onChange={(event) =>
                                 setRows((current) =>
@@ -237,7 +270,7 @@ export default function NewRequestPage() {
                                   ),
                                 )
                               }
-                              className="h-8"
+                              className="input-number h-8 w-24 px-2"
                             />
                           </TableCell>
                           <TableCell>
@@ -264,18 +297,18 @@ export default function NewRequestPage() {
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row">
-              <Select value={picker} onValueChange={setPicker}>
-                <SelectTrigger className="w-full sm:flex-1">
-                  <SelectValue placeholder="Pilih item untuk ditambahkan…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {items.map((item) => (
-                    <SelectItem key={item.id} value={item.id}>
-                      {item.name} · {item.code}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={picker}
+                onValueChange={setPicker}
+                placeholder="Pilih item untuk ditambahkan…"
+                searchPlaceholder="Cari nama atau kode item…"
+                options={items.map((item) => ({
+                  value: item.id,
+                  label: item.name,
+                  hint: `${item.code} · stok ${item.stockGudang} ${item.unit}`,
+                }))}
+                className="w-full sm:flex-1"
+              />
               <Button variant="outline" onClick={addRow}>
                 <Plus />
                 Tambah
@@ -293,9 +326,13 @@ export default function NewRequestPage() {
           <div className="bg-card border-border flex flex-col gap-3 rounded-xl border p-4">
             <p className="text-[13.5px] font-semibold">Ringkasan Permintaan</p>
             {[
-              ["Nomor pekerjaan", jobNo || "—"],
+              ["Nomor PO", poNo || "—"],
               ["Site", site || "—"],
-              ["Pelanggan", customer || "—"],
+              [
+                "Pelanggan",
+                customers.find((customer) => customer.id === customerId)?.name ??
+                  "—",
+              ],
               ["Jumlah item", `${chosen.length} item`],
               [
                 "Total unit",

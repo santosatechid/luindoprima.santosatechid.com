@@ -10,15 +10,9 @@ import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import { useUpdateUser, useUsers } from "@/hooks/users/useUsers";
-import { formatDate, formatDateTime } from "@/lib/format";
+import { formatDate } from "@/lib/format";
 import { authClient } from "@/services/auth/authClients";
 import type { Role } from "@/types/inventory";
 
@@ -32,6 +26,7 @@ export default function UserDetailPage() {
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [role, setRole] = useState<Role>("LEADER");
   const [password, setPassword] = useState("");
 
@@ -39,6 +34,7 @@ export default function UserDetailPage() {
     if (!currentUser) return;
     setName(currentUser.name);
     setEmail(currentUser.email);
+    setPhone(currentUser.phone ?? "");
     setRole(currentUser.role);
   }, [currentUser]);
 
@@ -56,6 +52,7 @@ export default function UserDetailPage() {
       id: currentUser.id,
       name,
       email,
+      phone,
       role,
       password: password || undefined,
     });
@@ -79,7 +76,7 @@ export default function UserDetailPage() {
     <div className="flex flex-col gap-5">
       <PageHeader
         title={currentUser.name}
-        description={`Akun ${currentUser.role} · dibuat ${formatDate(currentUser.createdAt)}.`}
+        description={`${currentUser.employeeNo ?? "Tanpa nomor"} · Akun ${currentUser.role} · dibuat ${formatDate(currentUser.createdAt)}.`}
         actions={
           <>
             <Button
@@ -111,6 +108,20 @@ export default function UserDetailPage() {
 
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="grid gap-1.5">
+                <Label className="text-[11.5px]">No. pengguna</Label>
+                <div className="border-border bg-muted text-muted-foreground flex h-10 items-center rounded-lg border px-3 text-[12px] tabular-nums">
+                  {currentUser.employeeNo ?? "—"}
+                </div>
+              </div>
+              <div className="grid gap-1.5">
+                <Label className="text-[11.5px]">Nomor WhatsApp</Label>
+                <Input
+                  value={phone}
+                  placeholder="0812 3456 7890"
+                  onChange={(event) => setPhone(event.target.value)}
+                />
+              </div>
+              <div className="grid gap-1.5">
                 <Label className="text-[11.5px]">Nama lengkap</Label>
                 <Input
                   value={name}
@@ -127,19 +138,17 @@ export default function UserDetailPage() {
               </div>
               <div className="grid gap-1.5">
                 <Label className="text-[11.5px]">Role</Label>
-                <Select
+                <SearchableSelect
                   value={role}
                   onValueChange={(value) => setRole(value as Role)}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ADMIN">Admin</SelectItem>
-                    <SelectItem value="DIREKTUR">Direktur</SelectItem>
-                    <SelectItem value="LEADER">Leader</SelectItem>
-                  </SelectContent>
-                </Select>
+                  searchPlaceholder="Cari role…"
+                  options={[
+                    { value: "ADMIN", label: "Admin" },
+                    { value: "DIREKTUR", label: "Direktur" },
+                    { value: "LEADER", label: "Leader" },
+                  ]}
+                  className="w-full"
+                />
               </div>
               <div className="grid gap-1.5">
                 <Label className="text-[11.5px]">Status akun</Label>
@@ -257,8 +266,9 @@ export default function UserDetailPage() {
               className="border-border bg-card text-foreground"
             />
             {[
+              ["No. pengguna", currentUser.employeeNo ?? "—"],
+              ["WhatsApp", currentUser.phone ?? "Belum diisi"],
               ["Akun dibuat", formatDate(currentUser.createdAt)],
-              ["Diperbarui", formatDateTime(currentUser.createdAt)],
               ["Status", currentUser.banned ? "Nonaktif" : "Aktif"],
             ].map(([label, value]) => (
               <div

@@ -1,23 +1,18 @@
 "use client";
 
-import { CheckCheck, RotateCcw, Search, Send } from "lucide-react";
+import { CheckCheck, Download, RotateCcw, Search, Send } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/shell/page-header";
 import { DateRangePicker } from "@/components/common/date-range-picker";
+import { TableSkeleton } from "@/components/shell/loading-state";
 import { EmptyState, StatCard } from "@/components/shell/stat-card";
 import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Table,
   TableBody,
@@ -38,7 +33,7 @@ import { authClient } from "@/services/auth/authClients";
 
 export default function TurnoverPage() {
   const { data: notes = [] } = useDeliveryNotes();
-  const { data: turnovers = [] } = useTurnovers();
+  const { data: turnovers = [], isLoading } = useTurnovers();
   const createTurnover = useCreateTurnover();
   const verifyTurnover = useVerifyTurnover();
   const { data: session } = authClient.useSession();
@@ -68,7 +63,10 @@ export default function TurnoverPage() {
       row.deliveryNote.number.toLowerCase().includes(query) ||
       row.deliveryNote.request.site.toLowerCase().includes(query) ||
       row.deliveryNote.request.leader.name.toLowerCase().includes(query) ||
-      (row.deliveryNote.request.customer ?? "")
+      (row.deliveryNote.request.customer?.name ?? "")
+        .toLowerCase()
+        .includes(query) ||
+      (row.deliveryNote.request.customer?.company ?? "")
         .toLowerCase()
         .includes(query) ||
       row.submittedBy.name.toLowerCase().includes(query);
@@ -169,25 +167,21 @@ export default function TurnoverPage() {
 
               <div className="grid gap-1.5">
                 <Label className="text-[11.5px]">Surat jalan</Label>
-                <Select
+                <SearchableSelect
                   value={noteId}
                   onValueChange={(value) => {
                     setNoteId(value);
                     setValues({});
                   }}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Pilih surat jalan terkonfirmasi" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {available.map((row) => (
-                      <SelectItem key={row.id} value={row.id}>
-                        {row.number} · {row.request.site} ·{" "}
-                        {row.request.leader.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                  placeholder="Pilih surat jalan terkonfirmasi"
+                  searchPlaceholder="Cari surat jalan, site, atau leader…"
+                  options={available.map((row) => ({
+                    value: row.id,
+                    label: row.number,
+                    hint: `${row.request.site} · ${row.request.leader.name}`,
+                  }))}
+                  className="w-full"
+                />
                 {available.length === 0 ? (
                   <p className="text-muted-foreground text-[10.5px]">
                     Belum ada surat jalan yang siap di-turnover.
@@ -202,10 +196,10 @@ export default function TurnoverPage() {
                       <TableHeader>
                         <TableRow>
                           <TableHead>Item</TableHead>
-                          <TableHead className="w-20">Dibawa</TableHead>
-                          <TableHead className="w-24">Terpakai</TableHead>
-                          <TableHead className="w-24">Kembali</TableHead>
-                          <TableHead className="w-24">Rusak</TableHead>
+                          <TableHead className="w-24">Dibawa</TableHead>
+                          <TableHead className="w-32">Terpakai</TableHead>
+                          <TableHead className="w-32">Kembali</TableHead>
+                          <TableHead className="w-32">Rusak</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -231,7 +225,8 @@ export default function TurnoverPage() {
                                       type="number"
                                       min={0}
                                       max={row.qty}
-                                      className="h-8"
+                                      inputMode="numeric"
+                                      className="input-number h-8 w-full min-w-[88px] px-2"
                                       value={value[field]}
                                       onChange={(event) =>
                                         setValues((current) => ({
@@ -306,14 +301,69 @@ export default function TurnoverPage() {
                         </div>
                         <StatusBadge status={row.status} />
                       </div>
-                      <div className="text-muted-foreground flex flex-wrap gap-x-4 gap-y-1 text-[10.5px]">
-                        {row.items.map((item) => (
-                          <span key={item.id}>
-                            {item.item.name}: {item.used} dipakai ·{" "}
-                            {item.returned} kembali · {item.damaged} rusak
-                          </span>
-                        ))}
+                      <div className="overflow-x-auto rounded-lg border">
+                        <Table>
+                          <TableHeader>
+                            <TableRow>
+                              <TableHead>Item</TableHead>
+                              <TableHead className="text-right">
+                                Dibawa
+                              </TableHead>
+                              <TableHead className="text-right">
+                                Dipakai
+                              </TableHead>
+                              <TableHead className="text-right">
+                                Kembali
+                              </TableHead>
+                              <TableHead className="text-right">Rusak</TableHead>
+                            </TableRow>
+                          </TableHeader>
+                          <TableBody>
+                            {row.items.map((item) => {
+                              return (
+                                <TableRow key={item.id}>
+                                  <TableCell>
+                                    <p className="text-xs font-medium">
+                                      {item.item.name}
+                                    </p>
+                                    <p className="text-muted-foreground text-[10.5px]">
+                                      {item.item.unit}
+                                    </p>
+                                  </TableCell>
+                                  <TableCell className="text-right text-xs tabular-nums">
+                                    {item.brought}
+                                  </TableCell>
+                                  <TableCell className="text-right text-xs font-medium tabular-nums">
+                                    {item.used}
+                                  </TableCell>
+                                  <TableCell className="text-right text-xs tabular-nums">
+                                    {item.returned}
+                                  </TableCell>
+                                  <TableCell
+                                    className={`text-right text-xs tabular-nums ${
+                                      item.damaged > 0
+                                        ? "text-destructive font-medium"
+                                        : ""
+                                    }`}
+                                  >
+                                    {item.damaged}
+                                  </TableCell>
+                                </TableRow>
+                              );
+                            })}
+                          </TableBody>
+                        </Table>
                       </div>
+                      {row.items.some(
+                        (item) =>
+                          item.brought !==
+                          item.used + item.returned + item.damaged,
+                      ) ? (
+                        <p className="text-destructive text-[10.5px]">
+                          Jumlah dipakai + kembali + rusak tidak sama dengan
+                          yang dibawa.
+                        </p>
+                      ) : null}
                       <Button
                         size="sm"
                         className="w-fit"
@@ -348,17 +398,18 @@ export default function TurnoverPage() {
                   className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
                 />
               </div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-9 w-full text-xs sm:w-[170px]">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL">Semua status</SelectItem>
-                  <SelectItem value="DRAFT">Draft</SelectItem>
-                  <SelectItem value="SUBMITTED">Menunggu Verifikasi</SelectItem>
-                  <SelectItem value="VERIFIED">Terverifikasi</SelectItem>
-                </SelectContent>
-              </Select>
+              <SearchableSelect
+                value={statusFilter}
+                onValueChange={setStatusFilter}
+                searchPlaceholder="Cari status…"
+                options={[
+                  { value: "ALL", label: "Semua status" },
+                  { value: "DRAFT", label: "Draft" },
+                  { value: "SUBMITTED", label: "Menunggu Verifikasi" },
+                  { value: "VERIFIED", label: "Terverifikasi" },
+                ]}
+                className="h-9 w-full text-xs sm:w-[170px]"
+              />
               <DateRangePicker
                 from={dateFrom}
                 to={dateTo}
@@ -370,7 +421,9 @@ export default function TurnoverPage() {
               />
             </div>
 
-            {filtered.length === 0 ? (
+            {isLoading ? (
+              <TableSkeleton rows={5} columns={5} />
+            ) : filtered.length === 0 ? (
               <EmptyState title="Belum ada turnover" />
             ) : (
               <Table>
@@ -381,28 +434,52 @@ export default function TurnoverPage() {
                     <TableHead>Leader</TableHead>
                     <TableHead>Tanggal</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead className="w-28">Rusak</TableHead>
+                    <TableHead className="w-32" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filtered.map((row) => (
-                    <TableRow key={row.id}>
-                      <TableCell className="text-xs font-medium">
-                        {row.deliveryNote.number}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">
-                        {row.deliveryNote.request.site}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">
-                        {row.submittedBy.name}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">
-                        {formatDate(row.submittedAt)}
-                      </TableCell>
-                      <TableCell>
-                        <StatusBadge status={row.status} />
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {filtered.map((row) => {
+                    const damaged = row.items.reduce(
+                      (sum, item) => sum + item.damaged,
+                      0,
+                    );
+                    return (
+                      <TableRow key={row.id}>
+                        <TableCell className="text-xs font-medium">
+                          {row.deliveryNote.number}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs">
+                          {row.deliveryNote.request.site}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs">
+                          {row.submittedBy.name}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs">
+                          {formatDate(row.submittedAt)}
+                        </TableCell>
+                        <TableCell>
+                          <StatusBadge status={row.status} />
+                        </TableCell>
+                        <TableCell className="text-xs tabular-nums">
+                          {damaged > 0 ? `${damaged} unit` : "—"}
+                        </TableCell>
+                        <TableCell>
+                          {damaged > 0 ? (
+                            <Button asChild variant="outline" size="xs">
+                              <a
+                                href={`/api/turnovers/${row.id}/pdf`}
+                                download={`BA-Rusak-${row.deliveryNote.number}.pdf`}
+                              >
+                                <Download />
+                                PDF
+                              </a>
+                            </Button>
+                          ) : null}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             )}

@@ -34,6 +34,7 @@ export const useCreateTurnover = () => {
       queryClient.invalidateQueries({ queryKey: ["turnovers"] });
       queryClient.invalidateQueries({ queryKey: ["delivery-notes"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     },
   });
 };
@@ -54,6 +55,7 @@ export const useVerifyTurnover = () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
       queryClient.invalidateQueries({ queryKey: ["requests"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     },
   });
 };

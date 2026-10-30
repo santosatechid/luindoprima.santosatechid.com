@@ -13,6 +13,10 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
+import {
+  TopItemsChart,
+  UsageByLeaderCustomerChart,
+} from "@/components/dashboard/usage-charts";
 import { PageHeader } from "@/components/shell/page-header";
 import { RequestPipeline } from "@/components/shell/request-pipeline";
 import { EmptyState, StatCard } from "@/components/shell/stat-card";
@@ -235,6 +239,11 @@ export default function DashboardPage() {
                 </Button>
               ) : null}
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+            <TopItemsChart items={data.topItems} />
+            <UsageByLeaderCustomerChart items={data.usageByLeaderCustomer} />
           </div>
 
           <div className="bg-card border-border flex flex-col gap-3 rounded-xl border p-4">

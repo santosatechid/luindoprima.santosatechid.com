@@ -3,6 +3,7 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { nextCookies } from "better-auth/next-js";
 import { admin } from "better-auth/plugins";
+import { adminAc, userAc } from "better-auth/plugins/admin/access";
 
 import { PrismaClient } from "@/prisma/generated/client";
 
@@ -27,6 +28,13 @@ export const auth = betterAuth({
     admin({
       defaultRole: "LEADER",
       adminRoles: ["ADMIN"],
+      // Plugin memakai key role apa adanya (case-sensitive). Role aplikasi
+      // memakai huruf besar, jadi daftarkan eksplisit.
+      roles: {
+        ADMIN: adminAc,
+        DIREKTUR: userAc,
+        LEADER: userAc,
+      },
       defaultBanReason: "Akun dinonaktifkan oleh Admin",
     }),
     nextCookies(),

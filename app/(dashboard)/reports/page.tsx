@@ -15,13 +15,7 @@ import { PageHeader } from "@/components/shell/page-header";
 import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Table,
   TableBody,
@@ -52,15 +46,20 @@ export default function ReportsPage() {
   const incomingRows = incoming.filter((row) =>
     inRange(row.receivedAt, dateFrom, dateTo),
   );
-  const customers = uniqueValues(notes.map((row) => row.request.customer));
+  const customers = uniqueValues(
+    notes.map((row) => row.request.customer?.name),
+  );
   const outgoingQuery = search.trim().toLowerCase();
   const outgoingRows = notes.filter((row) => {
     const matchesSearch =
       !outgoingQuery ||
       row.number.toLowerCase().includes(outgoingQuery) ||
-      row.request.jobNo.toLowerCase().includes(outgoingQuery) ||
+      row.request.poNo.toLowerCase().includes(outgoingQuery) ||
       row.request.site.toLowerCase().includes(outgoingQuery) ||
-      (row.request.customer ?? "").toLowerCase().includes(outgoingQuery) ||
+      (row.request.customer?.name ?? "").toLowerCase().includes(outgoingQuery) ||
+      (row.request.customer?.company ?? "")
+        .toLowerCase()
+        .includes(outgoingQuery) ||
       row.request.leader.name.toLowerCase().includes(outgoingQuery) ||
       row.items.some((item) =>
         item.item.name.toLowerCase().includes(outgoingQuery),
@@ -69,7 +68,7 @@ export default function ReportsPage() {
       inRange(row.confirmedAt ?? row.issuedAt, dateFrom, dateTo) &&
       matchesSearch &&
       (customerFilter === "ALL" ||
-        row.request.customer === customerFilter) &&
+        row.request.customer?.name === customerFilter) &&
       (statusFilter === "ALL" || row.status === statusFilter)
     );
   });
@@ -99,7 +98,7 @@ export default function ReportsPage() {
                 [
                   "Tanggal",
                   "No. Surat Jalan",
-                  "Pekerjaan",
+                  "No. PO",
                   "Site",
                   "Leader",
                   "Item",
@@ -110,7 +109,7 @@ export default function ReportsPage() {
                   row.items.map((item) => [
                     formatDate(row.confirmedAt ?? row.issuedAt),
                     row.number,
-                    row.request.jobNo,
+                    row.request.poNo,
                     row.request.site,
                     row.request.leader.name,
                     item.item.name,
@@ -187,7 +186,7 @@ export default function ReportsPage() {
               ...outgoingRows.map((row) => [
                 formatDate(row.confirmedAt ?? row.issuedAt),
                 row.number,
-                row.request.jobNo,
+                row.request.poNo,
                 row.request.site,
                 row.request.leader.name,
                 row.items.map((item) => item.item.name).join(", "),
@@ -288,30 +287,28 @@ export default function ReportsPage() {
               className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
             />
           </div>
-          <Select value={customerFilter} onValueChange={setCustomerFilter}>
-            <SelectTrigger className="h-9 w-full text-xs sm:w-[170px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Semua pelanggan</SelectItem>
-              {customers.map((value) => (
-                <SelectItem key={value} value={value}>
-                  {value}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-9 w-full text-xs sm:w-[150px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">Semua status</SelectItem>
-              <SelectItem value="ISSUED">Diterbitkan</SelectItem>
-              <SelectItem value="CONFIRMED">Dibawa</SelectItem>
-              <SelectItem value="COMPLETED">Selesai</SelectItem>
-            </SelectContent>
-          </Select>
+          <SearchableSelect
+            value={customerFilter}
+            onValueChange={setCustomerFilter}
+            searchPlaceholder="Cari pelanggan…"
+            options={[
+              { value: "ALL", label: "Semua pelanggan" },
+              ...customers.map((value) => ({ value, label: value })),
+            ]}
+            className="h-9 w-full text-xs sm:w-[170px]"
+          />
+          <SearchableSelect
+            value={statusFilter}
+            onValueChange={setStatusFilter}
+            searchPlaceholder="Cari status…"
+            options={[
+                { value: "ALL", label: "Semua status" },
+                { value: "ISSUED", label: "Diterbitkan" },
+                { value: "CONFIRMED", label: "Dibawa" },
+                { value: "COMPLETED", label: "Selesai" },
+              ]}
+            className="h-9 w-full text-xs sm:w-[150px]"
+            />
         </div>
 
         <Table>
@@ -336,7 +333,7 @@ export default function ReportsPage() {
                   {row.number}
                 </TableCell>
                 <TableCell className="text-muted-foreground text-xs">
-                  {row.request.jobNo} · {row.request.site}
+                  {row.request.poNo} · {row.request.site}
                 </TableCell>
                 <TableCell className="text-muted-foreground text-xs">
                   {row.request.leader.name}

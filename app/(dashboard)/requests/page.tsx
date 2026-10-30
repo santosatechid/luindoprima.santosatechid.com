@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/shell/page-header";
 import { DateRangePicker } from "@/components/common/date-range-picker";
 import { EmptyState } from "@/components/shell/stat-card";
+import { TableSkeleton } from "@/components/shell/loading-state";
 import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,13 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Table,
   TableBody,
@@ -69,7 +64,7 @@ export default function RequestsPage() {
   const [note, setNote] = useState("");
   const [qty, setQty] = useState<Record<string, number>>({});
 
-  const customers = uniqueValues(rows.map((row) => row.customer));
+  const customers = uniqueValues(rows.map((row) => row.customer?.name));
 
   const filtered = rows.filter((row) => {
     const matchesTab =
@@ -79,13 +74,15 @@ export default function RequestsPage() {
       (tab === "APPROVED" && row.status === "APPROVED") ||
       (tab === "COMPLETED" && row.status === "COMPLETED");
     const matchesStatus = status === "ALL" || row.status === status;
-    const matchesCustomer = customer === "ALL" || row.customer === customer;
+    const matchesCustomer =
+      customer === "ALL" || row.customer?.name === customer;
     const query = search.toLowerCase();
     const matchesSearch =
       row.number.toLowerCase().includes(query) ||
-      row.jobNo.toLowerCase().includes(query) ||
+      row.poNo.toLowerCase().includes(query) ||
       row.site.toLowerCase().includes(query) ||
-      (row.customer ?? "").toLowerCase().includes(query) ||
+      (row.customer?.name ?? "").toLowerCase().includes(query) ||
+      (row.customer?.company ?? "").toLowerCase().includes(query) ||
       row.leader.name.toLowerCase().includes(query);
     return (
       matchesTab &&
@@ -193,32 +190,30 @@ export default function RequestsPage() {
             className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
           />
         </div>
-        <Select value={status} onValueChange={setStatus}>
-          <SelectTrigger className="h-9 w-full text-xs sm:w-[180px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Semua status</SelectItem>
-            <SelectItem value="PENDING_ADMIN">Menunggu Admin</SelectItem>
-            <SelectItem value="PENDING_DIRECTOR">Menunggu Direktur</SelectItem>
-            <SelectItem value="APPROVED">Disetujui</SelectItem>
-            <SelectItem value="REJECTED">Ditolak</SelectItem>
-            <SelectItem value="COMPLETED">Selesai</SelectItem>
-          </SelectContent>
-        </Select>
-        <Select value={customer} onValueChange={setCustomer}>
-          <SelectTrigger className="h-9 w-full text-xs sm:w-[170px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Semua pelanggan</SelectItem>
-            {customers.map((value) => (
-              <SelectItem key={value} value={value}>
-                {value}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SearchableSelect
+          value={status}
+          onValueChange={setStatus}
+          searchPlaceholder="Cari status…"
+          options={[
+            { value: "ALL", label: "Semua status" },
+            { value: "PENDING_ADMIN", label: "Menunggu Admin" },
+            { value: "PENDING_DIRECTOR", label: "Menunggu Direktur" },
+            { value: "APPROVED", label: "Disetujui" },
+            { value: "REJECTED", label: "Ditolak" },
+            { value: "COMPLETED", label: "Selesai" },
+          ]}
+          className="h-9 w-full text-xs sm:w-[180px]"
+        />
+        <SearchableSelect
+          value={customer}
+          onValueChange={setCustomer}
+          searchPlaceholder="Cari pelanggan…"
+          options={[
+            { value: "ALL", label: "Semua pelanggan" },
+            ...customers.map((value) => ({ value, label: value })),
+          ]}
+          className="h-9 w-full text-xs sm:w-[170px]"
+        />
         <DateRangePicker
           from={dateFrom}
           to={dateTo}
@@ -232,7 +227,7 @@ export default function RequestsPage() {
 
       <div className="bg-card border-border overflow-hidden rounded-xl border">
         {isLoading ? (
-          <p className="p-6 text-sm">Memuat request…</p>
+          <TableSkeleton rows={5} columns={6} />
         ) : filtered.length === 0 ? (
           <EmptyState
             title="Belum ada request"
@@ -247,7 +242,7 @@ export default function RequestsPage() {
             <TableHeader>
               <TableRow className="bg-muted/60">
                 <TableHead className="w-40">Nomor Request</TableHead>
-                <TableHead>Pekerjaan &amp; Site</TableHead>
+                <TableHead>PO, Site &amp; Pelanggan</TableHead>
                 <TableHead className="w-44">Item</TableHead>
                 <TableHead className="w-20">Jumlah</TableHead>
                 <TableHead className="w-28">Dibutuhkan</TableHead>
@@ -272,9 +267,9 @@ export default function RequestsPage() {
                     </p>
                   </TableCell>
                   <TableCell>
-                    <p className="text-xs font-medium">{row.site}</p>
+                    <p className="text-xs font-medium">{row.poNo}</p>
                     <p className="text-muted-foreground text-[10.5px]">
-                      {row.jobNo} · {row.leader.name}
+                      {row.site} · {row.customer?.company ?? row.customer?.name ?? "Tanpa pelanggan"} · {row.leader.name}
                     </p>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
@@ -322,9 +317,9 @@ export default function RequestsPage() {
                 </div>
                 <div className="bg-muted rounded-lg p-3">
                   <p className="text-muted-foreground text-[10.5px]">
-                    Nomor pekerjaan
+                    Nomor PO
                   </p>
-                  <p className="font-medium">{selected.jobNo}</p>
+                  <p className="font-medium">{selected.poNo}</p>
                 </div>
                 <div className="bg-muted rounded-lg p-3">
                   <p className="text-muted-foreground text-[10.5px]">Site</p>
@@ -343,7 +338,7 @@ export default function RequestsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Item</TableHead>
-                      <TableHead className="w-24">Jumlah</TableHead>
+                      <TableHead className="w-36">Jumlah</TableHead>
                       <TableHead className="w-24">Stok</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -374,7 +369,7 @@ export default function RequestsPage() {
                                     ),
                                   }))
                                 }
-                                className="h-8 w-16 text-xs"
+                                className="input-number h-8 w-20 px-2 text-xs"
                               />
                               <span className="text-muted-foreground text-[10.5px]">
                                 {row.item.unit}

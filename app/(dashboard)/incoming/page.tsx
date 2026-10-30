@@ -10,13 +10,7 @@ import { EmptyState, StatCard } from "@/components/shell/stat-card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Table,
   TableBody,
@@ -145,19 +139,19 @@ export default function IncomingPage() {
                 className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
               />
             </div>
-            <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-              <SelectTrigger className="h-9 w-full text-xs sm:w-[180px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Semua supplier</SelectItem>
-                {suppliers.map((supplier) => (
-                  <SelectItem key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={supplierFilter}
+              onValueChange={setSupplierFilter}
+              searchPlaceholder="Cari supplier…"
+              options={[
+                { value: "ALL", label: "Semua supplier" },
+                ...suppliers.map((supplier) => ({
+                  value: supplier.id,
+                  label: supplier.name,
+                })),
+              ]}
+              className="h-9 w-full text-xs sm:w-[180px]"
+            />
             <DateRangePicker
               from={dateFrom}
               to={dateTo}
@@ -233,34 +227,33 @@ export default function IncomingPage() {
 
           <div className="grid gap-1.5">
             <Label className="text-[11.5px]">Supplier</Label>
-            <Select value={supplierId} onValueChange={setSupplierId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Pilih supplier" />
-              </SelectTrigger>
-              <SelectContent>
-                {suppliers.map((supplier) => (
-                  <SelectItem key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={supplierId}
+              onValueChange={setSupplierId}
+              placeholder="Pilih supplier"
+              searchPlaceholder="Cari supplier…"
+              options={suppliers.map((supplier) => ({
+                value: supplier.id,
+                label: supplier.name,
+              }))}
+              className="w-full"
+            />
           </div>
 
           <div className="grid gap-1.5">
             <Label className="text-[11.5px]">Item consumable</Label>
-            <Select value={itemId} onValueChange={setItemId}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Pilih item" />
-              </SelectTrigger>
-              <SelectContent>
-                {items.map((item) => (
-                  <SelectItem key={item.id} value={item.id}>
-                    {item.name} · {item.brand ?? item.code}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={itemId}
+              onValueChange={setItemId}
+              placeholder="Pilih item"
+              searchPlaceholder="Cari nama atau kode item…"
+              options={items.map((item) => ({
+                value: item.id,
+                label: item.name,
+                hint: `${item.code} · stok ${item.stockGudang} ${item.unit}`,
+              }))}
+              className="w-full"
+            />
           </div>
 
           <div className="grid gap-1.5">
@@ -269,6 +262,7 @@ export default function IncomingPage() {
               type="number"
               min={1}
               value={qty}
+              className="input-number px-3"
               onChange={(event) => setQty(event.target.value)}
             />
             <p className="text-muted-foreground text-[10.5px]">

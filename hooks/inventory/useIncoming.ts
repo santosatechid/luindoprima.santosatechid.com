@@ -30,6 +30,7 @@ export const useCreateIncoming = () => {
       queryClient.invalidateQueries({ queryKey: ["incoming"] });
       queryClient.invalidateQueries({ queryKey: ["items"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     },
   });
 };

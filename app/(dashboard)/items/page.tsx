@@ -1,6 +1,12 @@
 "use client";
 
-import { AlertTriangle, Plus, Search, SlidersHorizontal } from "lucide-react";
+import {
+  AlertTriangle,
+  Download,
+  Plus,
+  Search,
+  SlidersHorizontal,
+} from "lucide-react";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
@@ -18,13 +24,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Table,
   TableBody,
@@ -42,6 +42,9 @@ import {
   useSuppliers,
   useUpdateItem,
 } from "@/hooks/inventory/useItems";
+import { useTurnovers } from "@/hooks/inventory/useTurnovers";
+import { TableSkeleton } from "@/components/shell/loading-state";
+import { formatDate } from "@/lib/format";
 
 const EMPTY_ITEM = {
   code: "",
@@ -66,6 +69,7 @@ const EMPTY_SUPPLIER = {
 export default function ItemsPage() {
   const { data: items = [], isLoading } = useItems();
   const { data: suppliers = [] } = useSuppliers();
+  const { data: turnovers = [], isLoading: turnoversLoading } = useTurnovers();
   const createItem = useCreateItem();
   const createSupplier = useCreateSupplier();
   const updateItem = useUpdateItem();
@@ -125,6 +129,9 @@ export default function ItemsPage() {
   );
 
   const lowStock = items.filter((item) => item.stockGudang <= item.minStock);
+  const damagedRows = turnovers.filter((row) =>
+    row.items.some((item) => item.damaged > 0),
+  );
 
   const submitItem = async () => {
     if (!itemForm.code || !itemForm.name || !itemForm.unit) {
@@ -211,7 +218,7 @@ export default function ItemsPage() {
                       <Input
                         type="number"
                         min={0}
-                        className="h-8 w-24"
+                        className="input-number h-8 w-24 px-2"
                         value={minStock[item.id] ?? String(item.minStock)}
                         onChange={(event) =>
                           setMinStock((current) => ({
@@ -352,25 +359,30 @@ export default function ItemsPage() {
                   </div>
                   <div className="grid gap-1.5">
                     <Label>Kategori</Label>
-                    <Select
+                    <Input
                       value={itemForm.category}
-                      onValueChange={(value) =>
-                        setItemForm({ ...itemForm, category: value })
+                      list="item-category-options"
+                      placeholder="Ketik atau pilih kategori"
+                      onChange={(event) =>
+                        setItemForm({
+                          ...itemForm,
+                          category: event.target.value,
+                        })
                       }
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {["Film", "Chemical", "Penetrant", "APD", "Lainnya"].map(
-                          (value) => (
-                            <SelectItem key={value} value={value}>
-                              {value}
-                            </SelectItem>
-                          ),
-                        )}
-                      </SelectContent>
-                    </Select>
+                    />
+                    <datalist id="item-category-options">
+                      {categories.map((value) => (
+                        <option key={value} value={value} />
+                      ))}
+                      {["Film", "Chemical", "Penetrant", "APD", "Lainnya"]
+                        .filter((value) => !categories.includes(value))
+                        .map((value) => (
+                          <option key={value} value={value} />
+                        ))}
+                    </datalist>
+                    <p className="text-muted-foreground text-[10px]">
+                      Kategori baru langsung tersimpan dengan item ini.
+                    </p>
                   </div>
                   <div className="col-span-2 grid gap-1.5">
                     <Label>Nama item</Label>
@@ -411,7 +423,7 @@ export default function ItemsPage() {
                   </div>
                   <div className="grid gap-1.5">
                     <Label>Supplier</Label>
-                    <Select
+                    <SearchableSelect
                       value={itemForm.supplierId || "NONE"}
                       onValueChange={(value) =>
                         setItemForm({
@@ -419,25 +431,24 @@ export default function ItemsPage() {
                           supplierId: value === "NONE" ? "" : value,
                         })
                       }
-                    >
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Pilih supplier" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="NONE">Tanpa supplier</SelectItem>
-                        {suppliers.map((supplier) => (
-                          <SelectItem key={supplier.id} value={supplier.id}>
-                            {supplier.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      placeholder="Pilih supplier"
+                      searchPlaceholder="Cari supplier…"
+                      options={[
+                        { value: "NONE", label: "Tanpa supplier" },
+                        ...suppliers.map((supplier) => ({
+                          value: supplier.id,
+                          label: supplier.name,
+                        })),
+                      ]}
+                      className="w-full"
+                    />
                   </div>
                   <div className="grid gap-1.5">
                     <Label>Stok awal</Label>
                     <Input
                       type="number"
                       min={0}
+                      className="input-number px-3"
                       value={itemForm.stockGudang}
                       onChange={(event) =>
                         setItemForm({
@@ -452,6 +463,7 @@ export default function ItemsPage() {
                     <Input
                       type="number"
                       min={0}
+                      className="input-number px-3"
                       value={itemForm.minStock}
                       onChange={(event) =>
                         setItemForm({
@@ -481,6 +493,7 @@ export default function ItemsPage() {
           {[
             ["items", "Item", items.length],
             ["suppliers", "Supplier", suppliers.length],
+            ["damage", "Laporan Rusak", damagedRows.length],
           ].map(([value, label, count]) => (
             <TabsTrigger
               key={String(value)}
@@ -506,43 +519,41 @@ export default function ItemsPage() {
                 className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
               />
             </div>
-            <Select value={category} onValueChange={setCategory}>
-              <SelectTrigger className="h-9 w-full text-xs sm:w-[170px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Semua kategori</SelectItem>
-                {categories.map((value) => (
-                  <SelectItem key={value} value={value}>
-                    {value}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={supplierFilter} onValueChange={setSupplierFilter}>
-              <SelectTrigger className="h-9 w-full text-xs sm:w-[170px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Semua supplier</SelectItem>
-                {suppliers.map((supplier) => (
-                  <SelectItem key={supplier.id} value={supplier.id}>
-                    {supplier.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={stockFilter} onValueChange={setStockFilter}>
-              <SelectTrigger className="h-9 w-full text-xs sm:w-[150px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Semua stok</SelectItem>
-                <SelectItem value="SAFE">Aman</SelectItem>
-                <SelectItem value="LOW">Menipis</SelectItem>
-                <SelectItem value="EMPTY">Habis</SelectItem>
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={category}
+              onValueChange={setCategory}
+              searchPlaceholder="Cari kategori…"
+              options={[
+                { value: "ALL", label: "Semua kategori" },
+                ...categories.map((value) => ({ value, label: value })),
+              ]}
+              className="h-9 w-full text-xs sm:w-[170px]"
+            />
+            <SearchableSelect
+              value={supplierFilter}
+              onValueChange={setSupplierFilter}
+              searchPlaceholder="Cari supplier…"
+              options={[
+                { value: "ALL", label: "Semua supplier" },
+                ...suppliers.map((supplier) => ({
+                  value: supplier.id,
+                  label: supplier.name,
+                })),
+              ]}
+              className="h-9 w-full text-xs sm:w-[170px]"
+            />
+            <SearchableSelect
+              value={stockFilter}
+              onValueChange={setStockFilter}
+              searchPlaceholder="Cari status stok…"
+              options={[
+                { value: "ALL", label: "Semua stok" },
+                { value: "SAFE", label: "Aman" },
+                { value: "LOW", label: "Menipis" },
+                { value: "EMPTY", label: "Habis" },
+              ]}
+              className="h-9 w-full text-xs sm:w-[150px]"
+            />
           </div>
 
           {lowStock.length > 0 ? (
@@ -560,7 +571,7 @@ export default function ItemsPage() {
 
           <div className="bg-card border-border overflow-hidden rounded-xl border">
             {isLoading ? (
-              <div className="p-6 text-sm">Memuat item…</div>
+              <TableSkeleton rows={8} columns={10} />
             ) : filtered.length === 0 ? (
               <EmptyState title="Tidak ada item" description="Ubah filter atau tambah item baru." />
             ) : (
@@ -571,8 +582,10 @@ export default function ItemsPage() {
                     <TableHead>Item</TableHead>
                     <TableHead className="w-28">Kategori</TableHead>
                     <TableHead className="w-24">Ukuran</TableHead>
-                    <TableHead className="w-20">Satuan</TableHead>
                     <TableHead className="w-20">Stok</TableHead>
+                    <TableHead className="w-24">Di request</TableHead>
+                    <TableHead className="w-24">Tersedia</TableHead>
+                    <TableHead className="w-20">Satuan</TableHead>
                     <TableHead className="w-20">Minimum</TableHead>
                     <TableHead className="w-28">Status</TableHead>
                   </TableRow>
@@ -595,11 +608,17 @@ export default function ItemsPage() {
                       <TableCell className="text-muted-foreground text-xs">
                         {item.size ?? "—"}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-xs">
-                        {item.unit}
-                      </TableCell>
                       <TableCell className="text-xs font-medium">
                         {item.stockGudang}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs">
+                        {item.onRequest}
+                      </TableCell>
+                      <TableCell className="text-xs font-medium">
+                        {item.stockGudang - item.onRequest}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs">
+                        {item.unit}
                       </TableCell>
                       <TableCell className="text-muted-foreground text-xs">
                         {item.minStock}
@@ -637,16 +656,17 @@ export default function ItemsPage() {
                 className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
               />
             </div>
-            <Select value={supplierStatus} onValueChange={setSupplierStatus}>
-              <SelectTrigger className="h-9 w-full text-xs sm:w-[150px]">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ALL">Semua status</SelectItem>
-                <SelectItem value="ACTIVE">Aktif</SelectItem>
-                <SelectItem value="INACTIVE">Nonaktif</SelectItem>
-              </SelectContent>
-            </Select>
+            <SearchableSelect
+              value={supplierStatus}
+              onValueChange={setSupplierStatus}
+              searchPlaceholder="Cari status…"
+              options={[
+                { value: "ALL", label: "Semua status" },
+                { value: "ACTIVE", label: "Aktif" },
+                { value: "INACTIVE", label: "Nonaktif" },
+              ]}
+              className="h-9 w-full text-xs sm:w-[150px]"
+            />
           </div>
 
           {filteredSuppliers.length === 0 ? (
@@ -699,6 +719,96 @@ export default function ItemsPage() {
             </Table>
           </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="damage" className="flex flex-col gap-3">
+          <div className="bg-warning-surface border-warning-border flex items-start gap-2.5 rounded-lg border px-4 py-3">
+            <AlertTriangle className="text-warning mt-0.5 size-4 shrink-0" />
+            <p className="text-warning text-[11.5px] leading-5">
+              Barang rusak berasal dari laporan turnover Leader yang sudah
+              diverifikasi Admin. Setiap laporan dapat diunduh sebagai berita
+              acara resmi.
+            </p>
+          </div>
+
+          <div className="bg-card border-border overflow-x-auto rounded-xl border">
+            {turnoversLoading ? (
+              <TableSkeleton rows={4} columns={6} />
+            ) : damagedRows.length === 0 ? (
+              <EmptyState
+                title="Tidak ada barang rusak"
+                description="Laporan rusak akan muncul setelah turnover berisi barang rusak diverifikasi."
+              />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/60">
+                    <TableHead className="w-32">Surat Jalan</TableHead>
+                    <TableHead>Pelanggan</TableHead>
+                    <TableHead className="w-36">Leader</TableHead>
+                    <TableHead className="w-32">Tanggal</TableHead>
+                    <TableHead>Item &amp; Supplier</TableHead>
+                    <TableHead className="w-20 text-right">Rusak</TableHead>
+                    <TableHead className="w-28" />
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {damagedRows.map((row) => {
+                    const damaged = row.items.filter(
+                      (item) => item.damaged > 0,
+                    );
+                    return (
+                      <TableRow key={row.id}>
+                        <TableCell>
+                          <p className="text-xs font-medium">
+                            {row.deliveryNote.number}
+                          </p>
+                          <p className="text-muted-foreground text-[10.5px]">
+                            PO {row.deliveryNote.request.poNo}
+                          </p>
+                        </TableCell>
+                        <TableCell className="text-xs">
+                          {row.deliveryNote.request.customer?.company ??
+                            row.deliveryNote.request.customer?.name ??
+                            "—"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs">
+                          {row.submittedBy.name}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs">
+                          {formatDate(row.submittedAt)}
+                        </TableCell>
+                        <TableCell>
+                          {damaged.map((item) => (
+                            <p key={item.id} className="text-[11px]">
+                              {item.item.name} ·{" "}
+                              <span className="text-muted-foreground">
+                                {item.item.supplier?.name ?? "Tanpa supplier"}
+                              </span>
+                            </p>
+                          ))}
+                        </TableCell>
+                        <TableCell className="text-right text-xs font-medium tabular-nums">
+                          {damaged.reduce((sum, item) => sum + item.damaged, 0)}
+                        </TableCell>
+                        <TableCell>
+                          <Button asChild variant="outline" size="xs">
+                            <a
+                              href={`/api/turnovers/${row.id}/pdf`}
+                              download={`BA-Rusak-${row.deliveryNote.number}.pdf`}
+                            >
+                              <Download />
+                              PDF
+                            </a>
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            )}
+          </div>
         </TabsContent>
       </Tabs>
     </div>

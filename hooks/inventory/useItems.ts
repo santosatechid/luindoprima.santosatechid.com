@@ -33,7 +33,7 @@ export const useItems = (options?: { staleTime?: number }) =>
   useQuery({
     queryKey: ["items"],
     queryFn: async () => (await apiGet<Item[]>("/api/items")).data,
-    ...CACHE_STRATEGIES.static,
+    ...CACHE_STRATEGIES.dynamic,
     ...options,
   });
 
@@ -52,6 +52,7 @@ export const useCreateItem = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     },
   });
 };
@@ -64,6 +65,7 @@ export const useUpdateItem = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     },
   });
 };

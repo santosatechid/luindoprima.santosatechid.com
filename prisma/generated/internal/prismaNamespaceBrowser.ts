@@ -55,6 +55,7 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
+  Customer: 'Customer',
   Supplier: 'Supplier',
   Item: 'Item',
   Incoming: 'Incoming',
@@ -65,6 +66,7 @@ export const ModelName = {
   DeliveryNoteItem: 'DeliveryNoteItem',
   Turnover: 'Turnover',
   TurnoverItem: 'TurnoverItem',
+  Notification: 'Notification',
   AuditLog: 'AuditLog'
 } as const
 
@@ -86,8 +88,10 @@ export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof
 
 export const UserScalarFieldEnum = {
   id: 'id',
+  employeeNo: 'employeeNo',
   name: 'name',
   email: 'email',
+  phone: 'phone',
   emailVerified: 'emailVerified',
   image: 'image',
   role: 'role',
@@ -148,6 +152,24 @@ export const VerificationScalarFieldEnum = {
 export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[keyof typeof VerificationScalarFieldEnum]
 
 
+export const CustomerScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  name: 'name',
+  company: 'company',
+  contact: 'contact',
+  phone: 'phone',
+  email: 'email',
+  address: 'address',
+  note: 'note',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typeof CustomerScalarFieldEnum]
+
+
 export const SupplierScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -173,6 +195,7 @@ export const ItemScalarFieldEnum = {
   unit: 'unit',
   stockGudang: 'stockGudang',
   stockOperasional: 'stockOperasional',
+  onRequest: 'onRequest',
   minStock: 'minStock',
   supplierId: 'supplierId',
   isActive: 'isActive',
@@ -210,9 +233,9 @@ export type IncomingItemScalarFieldEnum = (typeof IncomingItemScalarFieldEnum)[k
 export const RequestScalarFieldEnum = {
   id: 'id',
   number: 'number',
-  jobNo: 'jobNo',
+  poNo: 'poNo',
   site: 'site',
-  customer: 'customer',
+  customerId: 'customerId',
   neededAt: 'neededAt',
   estimatedDoneAt: 'estimatedDoneAt',
   note: 'note',
@@ -294,6 +317,24 @@ export const TurnoverItemScalarFieldEnum = {
 } as const
 
 export type TurnoverItemScalarFieldEnum = (typeof TurnoverItemScalarFieldEnum)[keyof typeof TurnoverItemScalarFieldEnum]
+
+
+export const NotificationScalarFieldEnum = {
+  id: 'id',
+  channel: 'channel',
+  target: 'target',
+  targetName: 'targetName',
+  role: 'role',
+  subject: 'subject',
+  message: 'message',
+  status: 'status',
+  error: 'error',
+  entity: 'entity',
+  entityId: 'entityId',
+  createdAt: 'createdAt'
+} as const
+
+export type NotificationScalarFieldEnum = (typeof NotificationScalarFieldEnum)[keyof typeof NotificationScalarFieldEnum]
 
 
 export const AuditLogScalarFieldEnum = {

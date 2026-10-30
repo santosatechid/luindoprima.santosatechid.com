@@ -3,6 +3,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Number inputs: native spinners steal width and clip digits on narrow cells. */
+@layer utilities {
+  .input-number {
+    appearance: textfield;
+    -moz-appearance: textfield;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+  .input-number::-webkit-outer-spin-button,
+  .input-number::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

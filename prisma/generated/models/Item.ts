@@ -29,12 +29,14 @@ export type AggregateItem = {
 export type ItemAvgAggregateOutputType = {
   stockGudang: number | null
   stockOperasional: number | null
+  onRequest: number | null
   minStock: number | null
 }
 
 export type ItemSumAggregateOutputType = {
   stockGudang: number | null
   stockOperasional: number | null
+  onRequest: number | null
   minStock: number | null
 }
 
@@ -48,6 +50,7 @@ export type ItemMinAggregateOutputType = {
   unit: string | null
   stockGudang: number | null
   stockOperasional: number | null
+  onRequest: number | null
   minStock: number | null
   supplierId: string | null
   isActive: boolean | null
@@ -65,6 +68,7 @@ export type ItemMaxAggregateOutputType = {
   unit: string | null
   stockGudang: number | null
   stockOperasional: number | null
+  onRequest: number | null
   minStock: number | null
   supplierId: string | null
   isActive: boolean | null
@@ -82,6 +86,7 @@ export type ItemCountAggregateOutputType = {
   unit: number
   stockGudang: number
   stockOperasional: number
+  onRequest: number
   minStock: number
   supplierId: number
   isActive: number
@@ -94,12 +99,14 @@ export type ItemCountAggregateOutputType = {
 export type ItemAvgAggregateInputType = {
   stockGudang?: true
   stockOperasional?: true
+  onRequest?: true
   minStock?: true
 }
 
 export type ItemSumAggregateInputType = {
   stockGudang?: true
   stockOperasional?: true
+  onRequest?: true
   minStock?: true
 }
 
@@ -113,6 +120,7 @@ export type ItemMinAggregateInputType = {
   unit?: true
   stockGudang?: true
   stockOperasional?: true
+  onRequest?: true
   minStock?: true
   supplierId?: true
   isActive?: true
@@ -130,6 +138,7 @@ export type ItemMaxAggregateInputType = {
   unit?: true
   stockGudang?: true
   stockOperasional?: true
+  onRequest?: true
   minStock?: true
   supplierId?: true
   isActive?: true
@@ -147,6 +156,7 @@ export type ItemCountAggregateInputType = {
   unit?: true
   stockGudang?: true
   stockOperasional?: true
+  onRequest?: true
   minStock?: true
   supplierId?: true
   isActive?: true
@@ -251,6 +261,7 @@ export type ItemGroupByOutputType = {
   unit: string
   stockGudang: number
   stockOperasional: number
+  onRequest: number
   minStock: number
   supplierId: string | null
   isActive: boolean
@@ -291,6 +302,7 @@ export type ItemWhereInput = {
   unit?: Prisma.StringFilter<"Item"> | string
   stockGudang?: Prisma.IntFilter<"Item"> | number
   stockOperasional?: Prisma.IntFilter<"Item"> | number
+  onRequest?: Prisma.IntFilter<"Item"> | number
   minStock?: Prisma.IntFilter<"Item"> | number
   supplierId?: Prisma.StringNullableFilter<"Item"> | string | null
   isActive?: Prisma.BoolFilter<"Item"> | boolean
@@ -313,6 +325,7 @@ export type ItemOrderByWithRelationInput = {
   unit?: Prisma.SortOrder
   stockGudang?: Prisma.SortOrder
   stockOperasional?: Prisma.SortOrder
+  onRequest?: Prisma.SortOrder
   minStock?: Prisma.SortOrder
   supplierId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -338,6 +351,7 @@ export type ItemWhereUniqueInput = Prisma.AtLeast<{
   unit?: Prisma.StringFilter<"Item"> | string
   stockGudang?: Prisma.IntFilter<"Item"> | number
   stockOperasional?: Prisma.IntFilter<"Item"> | number
+  onRequest?: Prisma.IntFilter<"Item"> | number
   minStock?: Prisma.IntFilter<"Item"> | number
   supplierId?: Prisma.StringNullableFilter<"Item"> | string | null
   isActive?: Prisma.BoolFilter<"Item"> | boolean
@@ -360,6 +374,7 @@ export type ItemOrderByWithAggregationInput = {
   unit?: Prisma.SortOrder
   stockGudang?: Prisma.SortOrder
   stockOperasional?: Prisma.SortOrder
+  onRequest?: Prisma.SortOrder
   minStock?: Prisma.SortOrder
   supplierId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -385,6 +400,7 @@ export type ItemScalarWhereWithAggregatesInput = {
   unit?: Prisma.StringWithAggregatesFilter<"Item"> | string
   stockGudang?: Prisma.IntWithAggregatesFilter<"Item"> | number
   stockOperasional?: Prisma.IntWithAggregatesFilter<"Item"> | number
+  onRequest?: Prisma.IntWithAggregatesFilter<"Item"> | number
   minStock?: Prisma.IntWithAggregatesFilter<"Item"> | number
   supplierId?: Prisma.StringNullableWithAggregatesFilter<"Item"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"Item"> | boolean
@@ -402,6 +418,7 @@ export type ItemCreateInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -423,6 +440,7 @@ export type ItemUncheckedCreateInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   supplierId?: string | null
   isActive?: boolean
@@ -444,6 +462,7 @@ export type ItemUpdateInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -465,6 +484,7 @@ export type ItemUncheckedUpdateInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -486,6 +506,7 @@ export type ItemCreateManyInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   supplierId?: string | null
   isActive?: boolean
@@ -503,6 +524,7 @@ export type ItemUpdateManyMutationInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -519,6 +541,7 @@ export type ItemUncheckedUpdateManyInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -546,6 +569,7 @@ export type ItemCountOrderByAggregateInput = {
   unit?: Prisma.SortOrder
   stockGudang?: Prisma.SortOrder
   stockOperasional?: Prisma.SortOrder
+  onRequest?: Prisma.SortOrder
   minStock?: Prisma.SortOrder
   supplierId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -556,6 +580,7 @@ export type ItemCountOrderByAggregateInput = {
 export type ItemAvgOrderByAggregateInput = {
   stockGudang?: Prisma.SortOrder
   stockOperasional?: Prisma.SortOrder
+  onRequest?: Prisma.SortOrder
   minStock?: Prisma.SortOrder
 }
 
@@ -569,6 +594,7 @@ export type ItemMaxOrderByAggregateInput = {
   unit?: Prisma.SortOrder
   stockGudang?: Prisma.SortOrder
   stockOperasional?: Prisma.SortOrder
+  onRequest?: Prisma.SortOrder
   minStock?: Prisma.SortOrder
   supplierId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -586,6 +612,7 @@ export type ItemMinOrderByAggregateInput = {
   unit?: Prisma.SortOrder
   stockGudang?: Prisma.SortOrder
   stockOperasional?: Prisma.SortOrder
+  onRequest?: Prisma.SortOrder
   minStock?: Prisma.SortOrder
   supplierId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
@@ -596,6 +623,7 @@ export type ItemMinOrderByAggregateInput = {
 export type ItemSumOrderByAggregateInput = {
   stockGudang?: Prisma.SortOrder
   stockOperasional?: Prisma.SortOrder
+  onRequest?: Prisma.SortOrder
   minStock?: Prisma.SortOrder
 }
 
@@ -720,6 +748,7 @@ export type ItemCreateWithoutSupplierInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -740,6 +769,7 @@ export type ItemUncheckedCreateWithoutSupplierInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -789,6 +819,7 @@ export type ItemScalarWhereInput = {
   unit?: Prisma.StringFilter<"Item"> | string
   stockGudang?: Prisma.IntFilter<"Item"> | number
   stockOperasional?: Prisma.IntFilter<"Item"> | number
+  onRequest?: Prisma.IntFilter<"Item"> | number
   minStock?: Prisma.IntFilter<"Item"> | number
   supplierId?: Prisma.StringNullableFilter<"Item"> | string | null
   isActive?: Prisma.BoolFilter<"Item"> | boolean
@@ -806,6 +837,7 @@ export type ItemCreateWithoutIncomingItemsInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -826,6 +858,7 @@ export type ItemUncheckedCreateWithoutIncomingItemsInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   supplierId?: string | null
   isActive?: boolean
@@ -862,6 +895,7 @@ export type ItemUpdateWithoutIncomingItemsInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -882,6 +916,7 @@ export type ItemUncheckedUpdateWithoutIncomingItemsInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -902,6 +937,7 @@ export type ItemCreateWithoutRequestItemsInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -922,6 +958,7 @@ export type ItemUncheckedCreateWithoutRequestItemsInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   supplierId?: string | null
   isActive?: boolean
@@ -958,6 +995,7 @@ export type ItemUpdateWithoutRequestItemsInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -978,6 +1016,7 @@ export type ItemUncheckedUpdateWithoutRequestItemsInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -998,6 +1037,7 @@ export type ItemCreateWithoutDeliveryItemsInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -1018,6 +1058,7 @@ export type ItemUncheckedCreateWithoutDeliveryItemsInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   supplierId?: string | null
   isActive?: boolean
@@ -1054,6 +1095,7 @@ export type ItemUpdateWithoutDeliveryItemsInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1074,6 +1116,7 @@ export type ItemUncheckedUpdateWithoutDeliveryItemsInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1094,6 +1137,7 @@ export type ItemCreateWithoutTurnoverItemsInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -1114,6 +1158,7 @@ export type ItemUncheckedCreateWithoutTurnoverItemsInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   supplierId?: string | null
   isActive?: boolean
@@ -1150,6 +1195,7 @@ export type ItemUpdateWithoutTurnoverItemsInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1170,6 +1216,7 @@ export type ItemUncheckedUpdateWithoutTurnoverItemsInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   supplierId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1190,6 +1237,7 @@ export type ItemCreateManySupplierInput = {
   unit: string
   stockGudang?: number
   stockOperasional?: number
+  onRequest?: number
   minStock?: number
   isActive?: boolean
   createdAt?: Date | string
@@ -1206,6 +1254,7 @@ export type ItemUpdateWithoutSupplierInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1226,6 +1275,7 @@ export type ItemUncheckedUpdateWithoutSupplierInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1246,6 +1296,7 @@ export type ItemUncheckedUpdateManyWithoutSupplierInput = {
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   stockGudang?: Prisma.IntFieldUpdateOperationsInput | number
   stockOperasional?: Prisma.IntFieldUpdateOperationsInput | number
+  onRequest?: Prisma.IntFieldUpdateOperationsInput | number
   minStock?: Prisma.IntFieldUpdateOperationsInput | number
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1320,6 +1371,7 @@ export type ItemSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   unit?: boolean
   stockGudang?: boolean
   stockOperasional?: boolean
+  onRequest?: boolean
   minStock?: boolean
   supplierId?: boolean
   isActive?: boolean
@@ -1343,6 +1395,7 @@ export type ItemSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   unit?: boolean
   stockGudang?: boolean
   stockOperasional?: boolean
+  onRequest?: boolean
   minStock?: boolean
   supplierId?: boolean
   isActive?: boolean
@@ -1361,6 +1414,7 @@ export type ItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   unit?: boolean
   stockGudang?: boolean
   stockOperasional?: boolean
+  onRequest?: boolean
   minStock?: boolean
   supplierId?: boolean
   isActive?: boolean
@@ -1379,6 +1433,7 @@ export type ItemSelectScalar = {
   unit?: boolean
   stockGudang?: boolean
   stockOperasional?: boolean
+  onRequest?: boolean
   minStock?: boolean
   supplierId?: boolean
   isActive?: boolean
@@ -1386,7 +1441,7 @@ export type ItemSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "category" | "brand" | "size" | "unit" | "stockGudang" | "stockOperasional" | "minStock" | "supplierId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["item"]>
+export type ItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "code" | "name" | "category" | "brand" | "size" | "unit" | "stockGudang" | "stockOperasional" | "onRequest" | "minStock" | "supplierId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["item"]>
 export type ItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   supplier?: boolean | Prisma.Item$supplierArgs<ExtArgs>
   incomingItems?: boolean | Prisma.Item$incomingItemsArgs<ExtArgs>
@@ -1421,6 +1476,7 @@ export type $ItemPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     unit: string
     stockGudang: number
     stockOperasional: number
+    onRequest: number
     minStock: number
     supplierId: string | null
     isActive: boolean
@@ -1863,6 +1919,7 @@ export interface ItemFieldRefs {
   readonly unit: Prisma.FieldRef<"Item", 'String'>
   readonly stockGudang: Prisma.FieldRef<"Item", 'Int'>
   readonly stockOperasional: Prisma.FieldRef<"Item", 'Int'>
+  readonly onRequest: Prisma.FieldRef<"Item", 'Int'>
   readonly minStock: Prisma.FieldRef<"Item", 'Int'>
   readonly supplierId: Prisma.FieldRef<"Item", 'String'>
   readonly isActive: Prisma.FieldRef<"Item", 'Boolean'>

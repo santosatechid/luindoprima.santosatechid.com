@@ -1,8 +1,13 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { bad, guard } from "@/lib/authGuard";
+import { notifyRoles, notifyUser } from "@/services/notifications";
 import { handlePrismaError } from "@/services/errorHandler";
 import { prisma } from "@/services/prisma";
+import {
+  formatItems,
+  renderNotification,
+} from "@/services/whatsapp/templates";
 
 const include = {
   deliveryNote: {
@@ -11,9 +16,12 @@ const include = {
         select: {
           id: true,
           number: true,
-          jobNo: true,
+          poNo: true,
           site: true,
-          customer: true,
+          leaderId: true,
+          customer: {
+            select: { id: true, code: true, name: true, company: true },
+          },
           leader: { select: { name: true } },
         },
       },
@@ -22,7 +30,11 @@ const include = {
   },
   submittedBy: { select: { name: true } },
   verifiedBy: { select: { name: true } },
-  items: { include: { item: true } },
+  items: {
+    include: {
+      item: { include: { supplier: { select: { name: true } } } },
+    },
+  },
 } as const;
 
 export async function GET() {
@@ -103,6 +115,19 @@ export async function POST(request: NextRequest) {
       include,
     });
 
+    await notifyRoles(["ADMIN"], {
+      subject: "Turnover menunggu verifikasi",
+      message: renderNotification("turnoverSubmitted", {
+        number: note.number,
+        site: note.request.site,
+        leader: g.user.name,
+        damaged: `${rows.filter((row) => row.damaged > 0).length} jenis`,
+        items: formatItems(created.items),
+      }),
+      entity: "turnover",
+      entityId: created.id,
+    });
+
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
     return handlePrismaError(error);
@@ -121,7 +146,12 @@ export async function PATCH(request: NextRequest) {
 
     const turnover = await prisma.turnover.findUnique({
       where: { id: body.id },
-      include: { items: true, deliveryNote: true },
+      include: {
+        items: true,
+        deliveryNote: {
+          include: { request: { select: { id: true, leaderId: true } } },
+        },
+      },
     });
     if (!turnover) return bad("Turnover tidak ditemukan.", 404);
     if (turnover.status !== "SUBMITTED") {
@@ -174,6 +204,18 @@ export async function PATCH(request: NextRequest) {
       });
 
       return updated;
+    });
+
+    await notifyUser(turnover.deliveryNote.request.leaderId, {
+      subject: "Turnover diverifikasi",
+      message: renderNotification("turnoverVerified", {
+        number: verified.deliveryNote.number,
+        poNo: verified.deliveryNote.request.poNo,
+        site: verified.deliveryNote.request.site,
+        items: formatItems(verified.items),
+      }),
+      entity: "turnover",
+      entityId: verified.id,
     });
 
     return NextResponse.json(verified);

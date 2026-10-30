@@ -6,6 +6,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/shell/page-header";
+import { PageSkeleton } from "@/components/shell/loading-state";
 import { EmptyState } from "@/components/shell/stat-card";
 import { StatusBadge } from "@/components/shell/status-badge";
 import { Button } from "@/components/ui/button";
@@ -19,13 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SearchableSelect } from "@/components/ui/searchable-select";
 import {
   Table,
   TableBody,
@@ -44,11 +39,12 @@ const EMPTY = {
   name: "",
   email: "",
   password: "",
+  phone: "",
   role: "LEADER" as Role,
 };
 
 export default function UsersPage() {
-  const { data: users = [] } = useUsers();
+  const { data: users = [], isLoading } = useUsers();
   const createUser = useCreateUser();
   const [tab, setTab] = useState("ALL");
   const [search, setSearch] = useState("");
@@ -66,7 +62,9 @@ export default function UsersPage() {
       matchesTab &&
       matchesStatus &&
       (user.name.toLowerCase().includes(query) ||
-        user.email.toLowerCase().includes(query))
+        user.email.toLowerCase().includes(query) ||
+        (user.employeeNo ?? "").toLowerCase().includes(query) ||
+        (user.phone ?? "").toLowerCase().includes(query))
     );
   });
 
@@ -97,10 +95,12 @@ export default function UsersPage() {
               size="sm"
               onClick={() =>
                 downloadCsv("pengguna.csv", [
-                  ["Nama", "Email", "Role", "Status"],
+                  ["No. Pengguna", "Nama", "Email", "Telepon", "Role", "Status"],
                   ...users.map((user) => [
+                    user.employeeNo ?? "",
                     user.name,
                     user.email,
+                    user.phone ?? "",
                     user.role,
                     user.banned ? "Nonaktif" : "Aktif",
                   ]),
@@ -141,6 +141,19 @@ export default function UsersPage() {
                       }
                     />
                   </div>
+                  <div className="grid gap-1.5">
+                    <Label>Nomor WhatsApp</Label>
+                    <Input
+                      value={form.phone}
+                      placeholder="0812 3456 7890"
+                      onChange={(event) =>
+                        setForm({ ...form, phone: event.target.value })
+                      }
+                    />
+                    <p className="text-muted-foreground text-[10.5px]">
+                      Dipakai bot untuk mengirim notifikasi approval.
+                    </p>
+                  </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div className="grid gap-1.5">
                       <Label>Kata sandi</Label>
@@ -154,21 +167,19 @@ export default function UsersPage() {
                     </div>
                     <div className="grid gap-1.5">
                       <Label>Role</Label>
-                      <Select
+                      <SearchableSelect
                         value={form.role}
                         onValueChange={(value) =>
                           setForm({ ...form, role: value as Role })
                         }
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="ADMIN">Admin</SelectItem>
-                          <SelectItem value="DIREKTUR">Direktur</SelectItem>
-                          <SelectItem value="LEADER">Leader</SelectItem>
-                        </SelectContent>
-                      </Select>
+                        searchPlaceholder="Cari role…"
+                        options={[
+                          { value: "ADMIN", label: "Admin" },
+                          { value: "DIREKTUR", label: "Direktur" },
+                          { value: "LEADER", label: "Leader" },
+                        ]}
+                        className="w-full"
+                      />
                     </div>
                   </div>
                 </div>
@@ -215,25 +226,29 @@ export default function UsersPage() {
             className="h-9 border-0 bg-transparent px-0 text-xs shadow-none focus-visible:ring-0"
           />
         </div>
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="h-9 w-full text-xs sm:w-[150px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">Semua status</SelectItem>
-            <SelectItem value="ACTIVE">Aktif</SelectItem>
-            <SelectItem value="BANNED">Diblokir</SelectItem>
-          </SelectContent>
-        </Select>
+        <SearchableSelect
+          value={statusFilter}
+          onValueChange={setStatusFilter}
+          searchPlaceholder="Cari status…"
+          options={[
+            { value: "ALL", label: "Semua status" },
+            { value: "ACTIVE", label: "Aktif" },
+            { value: "BANNED", label: "Diblokir" },
+          ]}
+          className="h-9 w-full text-xs sm:w-[150px]"
+        />
       </div>
 
       <div className="bg-card border-border overflow-hidden rounded-xl border">
-        {filtered.length === 0 ? (
+        {isLoading ? (
+          <PageSkeleton columns={5} rows={6} />
+        ) : filtered.length === 0 ? (
           <EmptyState title="Tidak ada pengguna" />
         ) : (
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/60">
+                <TableHead className="w-32">No. Pengguna</TableHead>
                 <TableHead>Nama</TableHead>
                 <TableHead className="w-28">Role</TableHead>
                 <TableHead className="w-40">Terakhir masuk</TableHead>
@@ -244,10 +259,16 @@ export default function UsersPage() {
             <TableBody>
               {filtered.map((user) => (
                 <TableRow key={user.id}>
+                  <TableCell className="text-xs font-medium tabular-nums">
+                    {user.employeeNo ?? "—"}
+                  </TableCell>
                   <TableCell>
                     <p className="text-xs font-medium">{user.name}</p>
                     <p className="text-muted-foreground text-[10.5px]">
                       {user.email}
+                    </p>
+                    <p className="text-muted-foreground text-[10.5px]">
+                      {user.phone ?? "WhatsApp belum diisi"}
                     </p>
                   </TableCell>
                   <TableCell>

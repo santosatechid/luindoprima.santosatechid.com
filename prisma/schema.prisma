@@ -15,8 +15,10 @@ datasource db {
 
 model User {
   id            String    @id
+  employeeNo    String?   @unique
   name          String
   email         String    @unique
+  phone         String?
   emailVerified Boolean   @default(false)
   image         String?
   role          String    @default("LEADER")
@@ -93,6 +95,26 @@ model Verification {
 // Inventory
 // ---------------------------------------------------------------------------
 
+model Customer {
+  id        String   @id @default(cuid())
+  code      String   @unique
+  name      String
+  company   String?
+  contact   String?
+  phone     String?
+  email     String?
+  address   String?
+  note      String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  requests Request[]
+
+  @@index([name])
+  @@map("customer")
+}
+
 model Supplier {
   id        String   @id @default(cuid())
   name      String
@@ -120,6 +142,7 @@ model Item {
   unit             String
   stockGudang      Int      @default(0)
   stockOperasional Int      @default(0)
+  onRequest        Int      @default(0)
   minStock         Int      @default(0)
   supplierId       String?
   isActive         Boolean  @default(true)
@@ -173,9 +196,9 @@ model IncomingItem {
 model Request {
   id              String   @id @default(cuid())
   number          String   @unique
-  jobNo           String
+  poNo            String
   site            String
-  customer        String?
+  customerId      String?
   neededAt        DateTime
   estimatedDoneAt DateTime?
   note            String?
@@ -192,9 +215,11 @@ model Request {
   leader     User          @relation("RequestLeader", fields: [leaderId], references: [id])
   admin      User?         @relation("RequestAdmin", fields: [adminId], references: [id])
   director   User?         @relation("RequestDirector", fields: [directorId], references: [id])
+  customer   Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
   items      RequestItem[]
   delivery   DeliveryNote?
 
+  @@index([customerId])
   @@index([leaderId])
   @@index([status])
   @@map("request")
@@ -286,6 +311,25 @@ model TurnoverItem {
   @@index([turnoverId])
   @@index([itemId])
   @@map("turnover_item")
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  channel    String   @default("WHATSAPP")
+  target     String
+  targetName String?
+  role       String?
+  subject    String
+  message    String
+  status     String   @default("PENDING")
+  error      String?
+  entity     String?
+  entityId   String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([entity, entityId])
+  @@map("notification")
 }
 
 model AuditLog {

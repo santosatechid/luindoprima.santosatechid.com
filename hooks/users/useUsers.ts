@@ -10,6 +10,7 @@ export type UserInput = {
   name: string;
   email: string;
   password: string;
+  phone?: string;
   role: Role;
 };
 
@@ -17,6 +18,7 @@ export type UserUpdate = {
   id: string;
   name?: string;
   email?: string;
+  phone?: string;
   role?: Role;
   banned?: boolean;
   password?: string;

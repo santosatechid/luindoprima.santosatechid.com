@@ -62,6 +62,11 @@ export type Account = Prisma.AccountModel
  */
 export type Verification = Prisma.VerificationModel
 /**
+ * Model Customer
+ * 
+ */
+export type Customer = Prisma.CustomerModel
+/**
  * Model Supplier
  * 
  */
@@ -111,6 +116,11 @@ export type Turnover = Prisma.TurnoverModel
  * 
  */
 export type TurnoverItem = Prisma.TurnoverItemModel
+/**
+ * Model Notification
+ * 
+ */
+export type Notification = Prisma.NotificationModel
 /**
  * Model AuditLog
  * 

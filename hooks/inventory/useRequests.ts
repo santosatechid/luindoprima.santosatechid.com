@@ -7,9 +7,9 @@ import { apiGet, apiPatch, apiPost } from "@/lib/http/apiClient";
 import type { InventoryRequest } from "@/types/inventory";
 
 export type RequestInput = {
-  jobNo: string;
+  poNo: string;
   site: string;
-  customer?: string;
+  customerId: string;
   neededAt: string;
   estimatedDoneAt?: string;
   note?: string;
@@ -39,6 +39,7 @@ export const useCreateRequest = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["requests"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     },
   });
 };
@@ -51,6 +52,7 @@ export const useDecideRequest = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["requests"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     },
   });
 };

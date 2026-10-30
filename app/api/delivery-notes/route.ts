@@ -1,17 +1,21 @@
 import { type NextRequest, NextResponse } from "next/server";
 
 import { bad, guard } from "@/lib/authGuard";
+import { notifyUser } from "@/services/notifications";
 import { handlePrismaError } from "@/services/errorHandler";
 import { prisma } from "@/services/prisma";
+import { releaseStock } from "@/services/stockReservation";
+import { renderNotification } from "@/services/whatsapp/templates";
 
 const include = {
   request: {
     select: {
       id: true,
       number: true,
-      jobNo: true,
+      poNo: true,
       site: true,
-      customer: true,
+      leaderId: true,
+      customer: { select: { id: true, code: true, name: true, company: true } },
       leader: { select: { name: true } },
     },
   },
@@ -45,7 +49,12 @@ export async function POST(request: NextRequest) {
 
     const source = await prisma.request.findUnique({
       where: { id: body.requestId },
-      include: { items: true, delivery: true },
+      include: {
+        items: true,
+        delivery: true,
+        customer: true,
+        leader: { select: { name: true } },
+      },
     });
     if (!source) return bad("Request tidak ditemukan.", 404);
     if (source.status !== "APPROVED") {
@@ -85,6 +94,18 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    await notifyUser(source.leaderId, {
+      subject: "Surat jalan diterbitkan",
+      message: renderNotification("deliveryIssued", {
+        number: created.number,
+        poNo: source.poNo,
+        customer: source.customer?.company || source.customer?.name || "—",
+        site: source.site,
+      }),
+      entity: "delivery_note",
+      entityId: created.id,
+    });
+
     return NextResponse.json(created, { status: 201 });
   } catch (error) {
     return handlePrismaError(error);
@@ -103,7 +124,7 @@ export async function PATCH(request: NextRequest) {
 
     const note = await prisma.deliveryNote.findUnique({
       where: { id: body.id },
-      include: { items: true },
+      include: { items: true, request: { select: { leaderId: true } } },
     });
     if (!note) return bad("Surat jalan tidak ditemukan.", 404);
     if (note.status !== "ISSUED") {
@@ -127,6 +148,11 @@ export async function PATCH(request: NextRequest) {
         });
       }
 
+      await releaseStock(
+        tx,
+        note.items.map((row) => ({ itemId: row.itemId, qty: row.qty })),
+      );
+
       const updated = await tx.deliveryNote.update({
         where: { id: note.id },
         data: { status: "CONFIRMED", confirmedAt: new Date() },
@@ -144,6 +170,17 @@ export async function PATCH(request: NextRequest) {
       });
 
       return updated;
+    });
+
+    await notifyUser(note.request.leaderId, {
+      subject: "Barang keluar gudang",
+      message: renderNotification("deliveryConfirmed", {
+        number: confirmed.number,
+        poNo: confirmed.request.poNo,
+        site: confirmed.request.site,
+      }),
+      entity: "delivery_note",
+      entityId: confirmed.id,
     });
 
     return NextResponse.json(confirmed);

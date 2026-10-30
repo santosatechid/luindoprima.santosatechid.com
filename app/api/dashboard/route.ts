@@ -40,14 +40,16 @@ export async function GET() {
         include: { items: true },
       }),
       prisma.deliveryNote.findMany({
-        where: { status: "CONFIRMED", ...ownRequest },
+        where: { status: { in: ["CONFIRMED", "COMPLETED"] }, ...ownRequest },
         include: {
           request: {
             select: {
               number: true,
-              jobNo: true,
+              poNo: true,
               site: true,
-              customer: true,
+              customer: {
+                select: { id: true, code: true, name: true, company: true },
+              },
               leader: { select: { name: true } },
             },
           },
@@ -98,6 +100,59 @@ export async function GET() {
     .filter((row) => row.confirmedAt && new Date(row.confirmedAt) >= startOfMonth)
     .reduce((sum, row) => sum + row.items.reduce((s, i) => s + i.qty, 0), 0);
 
+  const usage = new Map<
+    string,
+    { itemId: string; name: string; unit: string; qty: number }
+  >();
+  const usageGroups = new Map<
+    string,
+    {
+      itemId: string;
+      leader: string;
+      customer: string;
+      qty: number;
+    }
+  >();
+
+  for (const note of confirmed) {
+    const leader = note.request.leader.name;
+    const customer =
+      note.request.customer?.company ??
+      note.request.customer?.name ??
+      "Tanpa pelanggan";
+
+    for (const row of note.items) {
+      const current = usage.get(row.itemId);
+      usage.set(row.itemId, {
+        itemId: row.itemId,
+        name: row.item.name,
+        unit: row.item.unit,
+        qty: (current?.qty ?? 0) + row.qty,
+      });
+
+      const groupKey = `${row.itemId}|${leader}|${customer}`;
+      const group = usageGroups.get(groupKey);
+      usageGroups.set(groupKey, {
+        itemId: row.itemId,
+        leader,
+        customer,
+        qty: (group?.qty ?? 0) + row.qty,
+      });
+    }
+  }
+
+  const topItems = [...usage.values()]
+    .sort((a, b) => b.qty - a.qty)
+    .slice(0, 6);
+
+  const usageByLeaderCustomer = topItems.map((item) => ({
+    ...item,
+    groups: [...usageGroups.values()]
+      .filter((group) => group.itemId === item.itemId)
+      .sort((a, b) => b.qty - a.qty)
+      .map(({ leader, customer, qty }) => ({ leader, customer, qty })),
+  }));
+
   return NextResponse.json({
     itemCount: items.length,
     stockGudang: items.reduce((sum, item) => sum + item.stockGudang, 0),
@@ -111,7 +166,9 @@ export async function GET() {
     pendingTurnover: turnoverCount,
     incomingThisMonth,
     outgoingThisMonth,
-    onSite: confirmed.slice(0, 5),
+    onSite: confirmed.filter((note) => note.status === "CONFIRMED").slice(0, 5),
+    topItems,
+    usageByLeaderCustomer,
     chart,
     pipeline: {
       pendingAdmin,

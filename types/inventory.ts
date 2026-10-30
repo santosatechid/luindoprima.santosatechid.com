@@ -20,10 +20,33 @@ export type Item = {
   unit: string;
   stockGudang: number;
   stockOperasional: number;
+  onRequest: number;
   minStock: number;
   supplierId: string | null;
   isActive: boolean;
   supplier?: { id: string; name: string } | null;
+};
+
+export type Customer = {
+  id: string;
+  code: string;
+  name: string;
+  company: string | null;
+  contact: string | null;
+  phone: string | null;
+  email: string | null;
+  address: string | null;
+  note: string | null;
+  isActive: boolean;
+  createdAt: string;
+  _count?: { requests: number };
+};
+
+export type CustomerRef = {
+  id: string;
+  code: string;
+  name: string;
+  company: string | null;
 };
 
 export type Supplier = {
@@ -56,9 +79,9 @@ export type RequestItem = { id: string; itemId: string; qty: number; item: Item 
 export type InventoryRequest = {
   id: string;
   number: string;
-  jobNo: string;
+  poNo: string;
   site: string;
-  customer: string | null;
+  customer: CustomerRef | null;
   neededAt: string;
   estimatedDoneAt: string | null;
   note: string | null;
@@ -91,9 +114,9 @@ export type DeliveryNote = {
   request: {
     id: string;
     number: string;
-    jobNo: string;
+    poNo: string;
     site: string;
-    customer: string | null;
+    customer: CustomerRef | null;
     leader: { name: string };
   };
   createdBy: { name: string };
@@ -131,12 +154,29 @@ export type OnSiteNote = {
   confirmedAt: string | null;
   request: {
     number: string;
-    jobNo: string;
+    poNo: string;
     site: string;
-    customer: string | null;
+    customer: CustomerRef | null;
     leader: { name: string };
   };
   items: { id: string; qty: number; item: Item }[];
+};
+
+export type ItemUsage = {
+  itemId: string;
+  name: string;
+  unit: string;
+  qty: number;
+};
+
+export type ItemUsageGroup = {
+  leader: string;
+  customer: string;
+  qty: number;
+};
+
+export type ItemUsageBreakdown = ItemUsage & {
+  groups: ItemUsageGroup[];
 };
 
 export type DashboardData = {
@@ -150,6 +190,8 @@ export type DashboardData = {
   incomingThisMonth: number;
   outgoingThisMonth: number;
   onSite: OnSiteNote[];
+  topItems: ItemUsage[];
+  usageByLeaderCustomer: ItemUsageBreakdown[];
   chart: { month: string; masuk: number; keluar: number }[];
   pipeline: {
     pendingAdmin: number;
@@ -162,8 +204,10 @@ export type DashboardData = {
 
 export type AppUser = {
   id: string;
+  employeeNo: string | null;
   name: string;
   email: string;
+  phone: string | null;
   role: Role;
   banned: boolean | null;
   createdAt: string;
