@@ -48,6 +48,11 @@ export type Customer = Prisma.CustomerModel
  */
 export type Supplier = Prisma.SupplierModel
 /**
+ * Model ItemCategory
+ * 
+ */
+export type ItemCategory = Prisma.ItemCategoryModel
+/**
  * Model Item
  * 
  */

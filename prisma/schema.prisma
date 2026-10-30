@@ -132,11 +132,25 @@ model Supplier {
   @@map("supplier")
 }
 
+model ItemCategory {
+  id         String   @id @default(cuid())
+  code       String   @unique
+  name       String   @unique
+  lastNumber Int      @default(0)
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  items Item[]
+
+  @@map("item_category")
+}
+
 model Item {
   id               String   @id @default(cuid())
   code             String   @unique
   name             String
-  category         String
+  categoryId       String
   brand            String?
   size             String?
   unit             String
@@ -149,14 +163,15 @@ model Item {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  supplier       Supplier?        @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  category       ItemCategory      @relation(fields: [categoryId], references: [id])
+  supplier       Supplier?         @relation(fields: [supplierId], references: [id], onDelete: SetNull)
   incomingItems  IncomingItem[]
   requestItems   RequestItem[]
   deliveryItems  DeliveryNoteItem[]
   turnoverItems  TurnoverItem[]
 
   @@index([supplierId])
-  @@index([category])
+  @@index([categoryId])
   @@map("item")
 }
 

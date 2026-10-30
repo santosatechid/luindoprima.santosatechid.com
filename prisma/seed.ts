@@ -24,6 +24,13 @@ const CUSTOMERS = [
   { name: "PT Pertamina Hulu Energi", company: "PHE ONWJ", contact: "Dimas", phone: "0812-1000-0003" },
 ];
 
+const CATEGORIES = [
+  { code: "FILM", name: "Film" },
+  { code: "CHM", name: "Chemical" },
+  { code: "PNT", name: "Penetrant" },
+  { code: "PPE", name: "APD" },
+];
+
 const ITEMS = [
   { code: "FILM-001", name: "Film Radiografi D7", category: "Film", brand: "AGFA", size: "30x40 cm", unit: "box", stockGudang: 420, stockOperasional: 0, minStock: 200 },
   { code: "FILM-002", name: "Film Radiografi D4", category: "Film", brand: "Fujifilm", size: "10x24 in", unit: "box", stockGudang: 186, stockOperasional: 0, minStock: 100 },
@@ -111,12 +118,47 @@ async function main() {
     if (!existing) await prisma.supplier.create({ data: supplier });
   }
 
+  const categoryByName = new Map<
+    string,
+    { id: string; code: string; lastNumber: number }
+  >();
+  for (const category of CATEGORIES) {
+    const saved = await prisma.itemCategory.upsert({
+      where: { code: category.code },
+      create: category,
+      update: { name: category.name },
+    });
+    categoryByName.set(category.name, saved);
+  }
+
   for (const item of ITEMS) {
+    const category = categoryByName.get(item.category);
+    if (!category) throw new Error(`Kategori ${item.category} belum terdaftar.`);
+
     await prisma.item.upsert({
       where: { code: item.code },
-      create: item,
-      update: { name: item.name, category: item.category, brand: item.brand, size: item.size, unit: item.unit, minStock: item.minStock },
+      create: {
+        code: item.code,
+        name: item.name,
+        categoryId: category.id,
+        brand: item.brand,
+        size: item.size,
+        unit: item.unit,
+        stockGudang: item.stockGudang,
+        stockOperasional: item.stockOperasional,
+        minStock: item.minStock,
+      },
+      update: { name: item.name, categoryId: category.id, brand: item.brand, size: item.size, unit: item.unit, minStock: item.minStock },
     });
+
+    const suffix = Number(item.code.split("-")[1] ?? 0);
+    if (suffix > category.lastNumber) {
+      await prisma.itemCategory.update({
+        where: { id: category.id },
+        data: { lastNumber: suffix },
+      });
+      category.lastNumber = suffix;
+    }
   }
 
   console.log(

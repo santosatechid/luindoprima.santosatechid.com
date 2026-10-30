@@ -4,19 +4,24 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { CACHE_STRATEGIES } from "@/app/providers";
 import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/http/apiClient";
-import type { Item, Supplier } from "@/types/inventory";
+import type { Item, ItemCategory, Supplier } from "@/types/inventory";
 
 export type ItemInput = {
   id?: string;
-  code: string;
   name: string;
-  category: string;
+  categoryId: string;
   brand?: string;
   size?: string;
   unit: string;
   stockGudang?: number;
   minStock?: number;
   supplierId?: string | null;
+};
+
+export type ItemCategoryInput = {
+  id?: string;
+  code: string;
+  name: string;
 };
 
 export type SupplierInput = {
@@ -37,6 +42,34 @@ export const useItems = (options?: { staleTime?: number }) =>
     ...options,
   });
 
+export const useItemCategories = () =>
+  useQuery({
+    queryKey: ["item-categories"],
+    queryFn: async () =>
+      (await apiGet<ItemCategory[]>("/api/item-categories")).data,
+    ...CACHE_STRATEGIES.static,
+  });
+
+export const useCreateItemCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: ItemCategoryInput) =>
+      (await apiPost<ItemCategory>("/api/item-categories", data)).data,
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["item-categories"] }),
+  });
+};
+
+export const useUpdateItemCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: ItemCategoryInput) =>
+      (await apiPut<ItemCategory>("/api/item-categories", data)).data,
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["item-categories"] }),
+  });
+};
+
 export const useSuppliers = () =>
   useQuery({
     queryKey: ["suppliers"],
@@ -53,6 +86,7 @@ export const useCreateItem = () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
+      queryClient.invalidateQueries({ queryKey: ["item-categories"] });
     },
   });
 };
@@ -66,6 +100,7 @@ export const useUpdateItem = () => {
       queryClient.invalidateQueries({ queryKey: ["items"] });
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
+      queryClient.invalidateQueries({ queryKey: ["item-categories"] });
     },
   });
 };

@@ -3,11 +3,12 @@
 import {
   AlertTriangle,
   Download,
+  Pencil,
   Plus,
   Search,
   SlidersHorizontal,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 
 import { PageHeader } from "@/components/shell/page-header";
@@ -37,19 +38,22 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import {
   useCreateItem,
+  useCreateItemCategory,
   useCreateSupplier,
+  useItemCategories,
   useItems,
   useSuppliers,
   useUpdateItem,
+  useUpdateItemCategory,
 } from "@/hooks/inventory/useItems";
 import { useTurnovers } from "@/hooks/inventory/useTurnovers";
 import { TableSkeleton } from "@/components/shell/loading-state";
 import { formatDate } from "@/lib/format";
+import type { Item } from "@/types/inventory";
 
 const EMPTY_ITEM = {
-  code: "",
   name: "",
-  category: "Film",
+  categoryId: "",
   brand: "",
   size: "",
   unit: "box",
@@ -57,6 +61,8 @@ const EMPTY_ITEM = {
   minStock: "0",
   supplierId: "",
 };
+
+const EMPTY_CATEGORY = { code: "", name: "" };
 
 const EMPTY_SUPPLIER = {
   name: "",
@@ -69,10 +75,13 @@ const EMPTY_SUPPLIER = {
 export default function ItemsPage() {
   const { data: items = [], isLoading } = useItems();
   const { data: suppliers = [] } = useSuppliers();
+  const { data: categories = [] } = useItemCategories();
   const { data: turnovers = [], isLoading: turnoversLoading } = useTurnovers();
   const createItem = useCreateItem();
+  const createCategory = useCreateItemCategory();
   const createSupplier = useCreateSupplier();
   const updateItem = useUpdateItem();
+  const updateCategory = useUpdateItemCategory();
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("ALL");
@@ -83,14 +92,23 @@ export default function ItemsPage() {
   const [itemForm, setItemForm] = useState(EMPTY_ITEM);
   const [supplierForm, setSupplierForm] = useState(EMPTY_SUPPLIER);
   const [itemOpen, setItemOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [supplierOpen, setSupplierOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [categoryForm, setCategoryForm] = useState(EMPTY_CATEGORY);
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(
+    null,
+  );
+  const [categoryForItem, setCategoryForItem] = useState(false);
   const [minStock, setMinStock] = useState<Record<string, string>>({});
 
-  const categories = useMemo(
-    () => Array.from(new Set(items.map((item) => item.category))).sort(),
-    [items],
+  const selectedCategory = categories.find(
+    (row) => row.id === itemForm.categoryId,
   );
+  const nextCode = selectedCategory
+    ? `${selectedCategory.code}-${String(selectedCategory.lastNumber + 1).padStart(3, "0")}`
+    : "Pilih kategori";
 
   const filtered = items.filter((item) => {
     const query = search.toLowerCase();
@@ -112,7 +130,7 @@ export default function ItemsPage() {
       matchesSearch &&
       matchesSupplier &&
       matchesStock &&
-      (category === "ALL" || item.category === category)
+      (category === "ALL" || item.categoryId === category)
     );
   });
 
@@ -133,20 +151,81 @@ export default function ItemsPage() {
     row.items.some((item) => item.damaged > 0),
   );
 
+  const closeItemDialog = () => {
+    setItemForm(EMPTY_ITEM);
+    setEditingItem(null);
+    setItemOpen(false);
+  };
+
+  const openEditItem = (item: Item) => {
+    setEditingItem(item);
+    setItemForm({
+      name: item.name,
+      categoryId: item.categoryId,
+      brand: item.brand ?? "",
+      size: item.size ?? "",
+      unit: item.unit,
+      stockGudang: String(item.stockGudang),
+      minStock: String(item.minStock),
+      supplierId: item.supplierId ?? "",
+    });
+    setItemOpen(true);
+  };
+
   const submitItem = async () => {
-    if (!itemForm.code || !itemForm.name || !itemForm.unit) {
-      toast.error("Kode, nama, dan satuan wajib diisi.");
+    if (!itemForm.name || !itemForm.categoryId || !itemForm.unit) {
+      toast.error("Nama, kategori, dan satuan wajib diisi.");
       return;
     }
-    await createItem.mutateAsync({
-      ...itemForm,
-      stockGudang: Number(itemForm.stockGudang),
+    const payload = {
+      name: itemForm.name,
+      categoryId: itemForm.categoryId,
+      brand: itemForm.brand,
+      size: itemForm.size,
+      unit: itemForm.unit,
       minStock: Number(itemForm.minStock),
       supplierId: itemForm.supplierId || null,
-    });
-    toast.success("Item ditambahkan.");
-    setItemForm(EMPTY_ITEM);
-    setItemOpen(false);
+    };
+    if (editingItem) {
+      await updateItem.mutateAsync({ id: editingItem.id, ...payload });
+      toast.success("Item diperbarui.");
+    } else {
+      await createItem.mutateAsync({
+        ...payload,
+        stockGudang: Number(itemForm.stockGudang),
+      });
+      toast.success("Item ditambahkan.");
+    }
+    closeItemDialog();
+  };
+
+  const openCategoryDialog = (row?: { id: string; code: string; name: string }) => {
+    setEditingCategoryId(row?.id ?? null);
+    setCategoryForm(row ? { code: row.code, name: row.name } : EMPTY_CATEGORY);
+    setCategoryOpen(true);
+  };
+
+  const submitCategory = async () => {
+    const code = categoryForm.code.trim().toUpperCase();
+    const name = categoryForm.name.trim();
+    if (!code || !name) {
+      toast.error("Kode dan nama kategori wajib diisi.");
+      return;
+    }
+    if (editingCategoryId) {
+      await updateCategory.mutateAsync({ id: editingCategoryId, code, name });
+      toast.success("Kategori diperbarui.");
+    } else {
+      const created = await createCategory.mutateAsync({ code, name });
+      toast.success("Kategori ditambahkan.");
+      if (categoryForItem) {
+        setItemForm((form) => ({ ...form, categoryId: created.id }));
+      }
+    }
+    setCategoryOpen(false);
+    setEditingCategoryId(null);
+    setCategoryForm(EMPTY_CATEGORY);
+    setCategoryForItem(false);
   };
 
   const submitSupplier = async () => {
@@ -169,9 +248,8 @@ export default function ItemsPage() {
     for (const item of changed) {
       await updateItem.mutateAsync({
         id: item.id,
-        code: item.code,
         name: item.name,
-        category: item.category,
+        categoryId: item.categoryId,
         brand: item.brand ?? "",
         size: item.size ?? "",
         unit: item.unit,
@@ -335,7 +413,16 @@ export default function ItemsPage() {
               </DialogContent>
             </Dialog>
 
-            <Dialog open={itemOpen} onOpenChange={setItemOpen}>
+            <Dialog
+              open={itemOpen}
+              onOpenChange={(open) => {
+                if (open) {
+                  setEditingItem(null);
+                  setItemForm(EMPTY_ITEM);
+                }
+                setItemOpen(open);
+              }}
+            >
               <DialogTrigger asChild>
                 <Button size="sm">
                   <Plus />
@@ -344,45 +431,51 @@ export default function ItemsPage() {
               </DialogTrigger>
               <DialogContent className="max-h-[85vh] overflow-y-auto sm:max-w-xl">
                 <DialogHeader>
-                  <DialogTitle>Tambah item consumable</DialogTitle>
+                  <DialogTitle>
+                    {editingItem ? "Edit item" : "Tambah item consumable"}
+                  </DialogTitle>
                 </DialogHeader>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-1.5">
                     <Label>Kode</Label>
                     <Input
-                      value={itemForm.code}
-                      placeholder="FILM-004"
-                      onChange={(event) =>
-                        setItemForm({ ...itemForm, code: event.target.value })
-                      }
+                      readOnly
+                      value={editingItem ? editingItem.code : nextCode}
+                      className="bg-muted/50"
                     />
+                    <p className="text-muted-foreground text-[10px]">
+                      {editingItem
+                        ? "Kode tetap saat edit."
+                        : "Nomor urut naik otomatis dari kode kategori."}
+                    </p>
                   </div>
                   <div className="grid gap-1.5">
-                    <Label>Kategori</Label>
-                    <Input
-                      value={itemForm.category}
-                      list="item-category-options"
-                      placeholder="Ketik atau pilih kategori"
-                      onChange={(event) =>
-                        setItemForm({
-                          ...itemForm,
-                          category: event.target.value,
-                        })
+                    <div className="flex items-center justify-between">
+                      <Label>Kategori</Label>
+                      <button
+                        type="button"
+                        className="text-[10.5px] font-medium underline"
+                        onClick={() => {
+                          setCategoryForItem(true);
+                          openCategoryDialog();
+                        }}
+                      >
+                        + Kategori baru
+                      </button>
+                    </div>
+                    <SearchableSelect
+                      value={itemForm.categoryId}
+                      onValueChange={(value) =>
+                        setItemForm({ ...itemForm, categoryId: value })
                       }
+                      placeholder="Pilih kategori"
+                      searchPlaceholder="Cari kategori…"
+                      options={categories.map((row) => ({
+                        value: row.id,
+                        label: row.name,
+                        hint: row.code,
+                      }))}
                     />
-                    <datalist id="item-category-options">
-                      {categories.map((value) => (
-                        <option key={value} value={value} />
-                      ))}
-                      {["Film", "Chemical", "Penetrant", "APD", "Lainnya"]
-                        .filter((value) => !categories.includes(value))
-                        .map((value) => (
-                          <option key={value} value={value} />
-                        ))}
-                    </datalist>
-                    <p className="text-muted-foreground text-[10px]">
-                      Kategori baru langsung tersimpan dengan item ini.
-                    </p>
                   </div>
                   <div className="col-span-2 grid gap-1.5">
                     <Label>Nama item</Label>
@@ -443,21 +536,27 @@ export default function ItemsPage() {
                       className="w-full"
                     />
                   </div>
-                  <div className="grid gap-1.5">
-                    <Label>Stok awal</Label>
-                    <Input
-                      type="number"
-                      min={0}
-                      className="input-number px-3"
-                      value={itemForm.stockGudang}
-                      onChange={(event) =>
-                        setItemForm({
-                          ...itemForm,
-                          stockGudang: event.target.value,
-                        })
-                      }
-                    />
-                  </div>
+                  {editingItem ? null : (
+                    <div className="grid gap-1.5">
+                      <Label>Stok awal</Label>
+                      <Input
+                        type="number"
+                        min={0}
+                        className="input-number px-3"
+                        value={itemForm.stockGudang}
+                        onChange={(event) =>
+                          setItemForm({
+                            ...itemForm,
+                            stockGudang: event.target.value,
+                          })
+                        }
+                      />
+                      <p className="text-muted-foreground text-[10px]">
+                        Hanya saat item dibuat. Stok berikutnya lewat Barang
+                        Masuk.
+                      </p>
+                    </div>
+                  )}
                   <div className="grid gap-1.5">
                     <Label>Stok minimum</Label>
                     <Input
@@ -475,11 +574,81 @@ export default function ItemsPage() {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setItemOpen(false)}>
+                  <Button variant="outline" onClick={closeItemDialog}>
                     Batal
                   </Button>
-                  <Button onClick={submitItem} disabled={createItem.isPending}>
-                    Simpan Item
+                  <Button
+                    onClick={submitItem}
+                    disabled={createItem.isPending || updateItem.isPending}
+                  >
+                    {editingItem ? "Simpan Perubahan" : "Simpan Item"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog
+              open={categoryOpen}
+              onOpenChange={(open) => {
+                setCategoryOpen(open);
+                if (!open) {
+                  setCategoryForItem(false);
+                  setEditingCategoryId(null);
+                  setCategoryForm(EMPTY_CATEGORY);
+                }
+              }}
+            >
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingCategoryId ? "Edit kategori" : "Tambah kategori"}
+                  </DialogTitle>
+                </DialogHeader>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="grid gap-1.5">
+                    <Label>Kode kategori</Label>
+                    <Input
+                      value={categoryForm.code}
+                      placeholder="FLM"
+                      onChange={(event) =>
+                        setCategoryForm({
+                          ...categoryForm,
+                          code: event.target.value,
+                        })
+                      }
+                    />
+                    <p className="text-muted-foreground text-[10px]">
+                      Prefix kode item, mis. FLM → FLM-001.
+                    </p>
+                  </div>
+                  <div className="grid gap-1.5">
+                    <Label>Nama kategori</Label>
+                    <Input
+                      value={categoryForm.name}
+                      onChange={(event) =>
+                        setCategoryForm({
+                          ...categoryForm,
+                          name: event.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setCategoryOpen(false);
+                      setCategoryForItem(false);
+                    }}
+                  >
+                    Batal
+                  </Button>
+                  <Button
+                    onClick={submitCategory}
+                    disabled={createCategory.isPending || updateCategory.isPending}
+                  >
+                    Simpan Kategori
                   </Button>
                 </DialogFooter>
               </DialogContent>
@@ -492,6 +661,7 @@ export default function ItemsPage() {
         <TabsList className="h-auto flex-wrap justify-start gap-1 rounded-none bg-transparent p-0">
           {[
             ["items", "Item", items.length],
+            ["categories", "Kategori", categories.length],
             ["suppliers", "Supplier", suppliers.length],
             ["damage", "Laporan Rusak", damagedRows.length],
           ].map(([value, label, count]) => (
@@ -525,7 +695,11 @@ export default function ItemsPage() {
               searchPlaceholder="Cari kategori…"
               options={[
                 { value: "ALL", label: "Semua kategori" },
-                ...categories.map((value) => ({ value, label: value })),
+                ...categories.map((row) => ({
+                  value: row.id,
+                  label: row.name,
+                  hint: row.code,
+                })),
               ]}
               className="h-9 w-full text-xs sm:w-[170px]"
             />
@@ -588,6 +762,7 @@ export default function ItemsPage() {
                     <TableHead className="w-20">Satuan</TableHead>
                     <TableHead className="w-20">Minimum</TableHead>
                     <TableHead className="w-28">Status</TableHead>
+                    <TableHead className="w-12" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -603,7 +778,7 @@ export default function ItemsPage() {
                         </p>
                       </TableCell>
                       <TableCell className="text-muted-foreground text-xs">
-                        {item.category}
+                        {item.category?.name ?? "—"}
                       </TableCell>
                       <TableCell className="text-muted-foreground text-xs">
                         {item.size ?? "—"}
@@ -634,6 +809,16 @@ export default function ItemsPage() {
                           }
                         />
                       </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          onClick={() => openEditItem(item)}
+                        >
+                          <Pencil />
+                          Edit
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -643,6 +828,60 @@ export default function ItemsPage() {
           <p className="text-muted-foreground text-[11.5px]">
             Menampilkan {filtered.length} dari {items.length} item.
           </p>
+        </TabsContent>
+
+        <TabsContent value="categories" className="flex flex-col gap-3">
+          <div className="flex items-center justify-between gap-2">
+            <p className="text-muted-foreground text-[11.5px]">
+              Kode kategori menjadi prefix kode item otomatis.
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setCategoryForItem(false);
+                openCategoryDialog();
+              }}
+            >
+              <Plus />
+              Tambah Kategori
+            </Button>
+          </div>
+          <div className="bg-card border-border overflow-hidden rounded-xl border">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-muted/60">
+                  <TableHead className="w-24">Kode</TableHead>
+                  <TableHead>Kategori</TableHead>
+                  <TableHead className="w-20">Item</TableHead>
+                  <TableHead className="w-24" />
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {categories.map((row) => (
+                  <TableRow key={row.id}>
+                    <TableCell className="text-xs font-medium">
+                      {row.code}
+                    </TableCell>
+                    <TableCell className="text-xs">{row.name}</TableCell>
+                    <TableCell className="text-muted-foreground text-xs">
+                      {row._count?.items ?? 0}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        onClick={() => openCategoryDialog(row)}
+                      >
+                        <Pencil />
+                        Edit
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </TabsContent>
 
         <TabsContent value="suppliers" className="flex flex-col gap-3">

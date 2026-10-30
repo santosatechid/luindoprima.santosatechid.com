@@ -28,7 +28,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useDeliveryNotes } from "@/hooks/inventory/useDeliveryNotes";
 import { useTurnovers } from "@/hooks/inventory/useTurnovers";
-import { useItems, useSuppliers } from "@/hooks/inventory/useItems";
+import {
+  useItemCategories,
+  useItems,
+  useSuppliers,
+} from "@/hooks/inventory/useItems";
 import { downloadCsv } from "@/lib/csv";
 import { formatDateTime } from "@/lib/format";
 import type { Item } from "@/types/inventory";
@@ -48,6 +52,7 @@ export default function StockPage() {
     dataUpdatedAt,
   } = useItems({ staleTime: 30 * 1000 });
   const { data: suppliers = [] } = useSuppliers();
+  const { data: categories = [] } = useItemCategories();
   const { data: notes = [] } = useDeliveryNotes();
   const { data: turnovers = [] } = useTurnovers();
 
@@ -57,11 +62,6 @@ export default function StockPage() {
   const [supplierFilter, setSupplierFilter] = useState("ALL");
   const [stockFilter, setStockFilter] = useState("ALL");
 
-  const categories = useMemo(
-    () => Array.from(new Set(items.map((item) => item.category))).sort(),
-    [items],
-  );
-
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     return items.filter((item) => {
@@ -70,7 +70,8 @@ export default function StockPage() {
         item.name.toLowerCase().includes(query) ||
         item.code.toLowerCase().includes(query) ||
         (item.brand ?? "").toLowerCase().includes(query);
-      const matchesCategory = category === "ALL" || item.category === category;
+      const matchesCategory =
+        category === "ALL" || item.categoryId === category;
       const matchesSupplier =
         supplierFilter === "ALL" || item.supplierId === supplierFilter;
       const matchesStock =
@@ -246,7 +247,7 @@ export default function StockPage() {
         ...filtered.map((item) => [
           item.code,
           item.name,
-          item.category,
+          item.category?.name ?? "",
           item.brand ?? "",
           item.size ?? "",
           item.unit,
@@ -354,7 +355,11 @@ export default function StockPage() {
           searchPlaceholder="Cari kategori…"
           options={[
             { value: "ALL", label: "Semua kategori" },
-            ...categories.map((value) => ({ value, label: value })),
+            ...categories.map((row) => ({
+              value: row.id,
+              label: row.name,
+              hint: row.code,
+            })),
           ]}
           className="h-9 w-full text-xs sm:w-[170px]"
         />
@@ -420,7 +425,7 @@ export default function StockPage() {
                     </p>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
-                    {item.category}
+                    {item.category?.name ?? "—"}
                   </TableCell>
                   <TableCell className="text-xs font-medium">
                     {item.stockGudang} {item.unit}

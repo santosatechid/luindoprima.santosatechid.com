@@ -10,11 +10,19 @@ export type RequestStatus =
 export type DeliveryStatus = "ISSUED" | "CONFIRMED" | "COMPLETED";
 export type TurnoverStatus = "DRAFT" | "SUBMITTED" | "VERIFIED";
 
+export type ItemCategoryRef = { id: string; code: string; name: string };
+
+export type ItemCategory = ItemCategoryRef & {
+  lastNumber: number;
+  isActive: boolean;
+  _count?: { items: number };
+};
+
 export type Item = {
   id: string;
   code: string;
   name: string;
-  category: string;
+  categoryId: string;
   brand: string | null;
   size: string | null;
   unit: string;
@@ -25,6 +33,7 @@ export type Item = {
   supplierId: string | null;
   isActive: boolean;
   supplier?: { id: string; name: string } | null;
+  category?: ItemCategoryRef;
 };
 
 export type Customer = {
