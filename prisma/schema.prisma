@@ -123,6 +123,7 @@ model Supplier {
   email     String?
   address   String?
   isActive  Boolean  @default(true)
+  deletedAt DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -138,6 +139,7 @@ model ItemCategory {
   name       String   @unique
   lastNumber Int      @default(0)
   isActive   Boolean  @default(true)
+  deletedAt  DateTime?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
@@ -160,6 +162,7 @@ model Item {
   minStock         Int      @default(0)
   supplierId       String?
   isActive         Boolean  @default(true)
+  deletedAt        DateTime?
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 

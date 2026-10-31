@@ -9,7 +9,10 @@ export async function GET() {
   if (g.error) return g.error;
 
   const suppliers = await prisma.supplier.findMany({
-    include: { _count: { select: { items: true } } },
+    where: { deletedAt: null },
+    include: {
+      _count: { select: { items: { where: { deletedAt: null } } } },
+    },
     orderBy: { name: "asc" },
   });
   return NextResponse.json(suppliers);
@@ -44,6 +47,11 @@ export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
     if (!body.id) return bad("ID supplier wajib diisi.");
+    const existing = await prisma.supplier.findFirst({
+      where: { id: body.id, deletedAt: null },
+      select: { id: true },
+    });
+    if (!existing) return bad("Supplier tidak ditemukan atau sudah dihapus.");
     const supplier = await prisma.supplier.update({
       where: { id: body.id },
       data: {
@@ -68,10 +76,27 @@ export async function DELETE(request: NextRequest) {
   try {
     const { id } = await request.json();
     if (!id) return bad("ID supplier wajib diisi.");
-    const supplier = await prisma.supplier.update({
-      where: { id },
-      data: { isActive: false },
+    const res = await prisma.supplier.updateMany({
+      where: { id, deletedAt: null },
+      data: { isActive: false, deletedAt: new Date() },
     });
+    if (res.count === 0) {
+      return bad("Supplier tidak ditemukan atau sudah dihapus.");
+    }
+    const supplier = await prisma.supplier.findUniqueOrThrow({
+      where: { id },
+    });
+
+    await prisma.auditLog.create({
+      data: {
+        actorId: g.user.id,
+        action: "DELETE",
+        entity: "supplier",
+        entityId: supplier.id,
+        meta: JSON.stringify({ name: supplier.name }),
+      },
+    });
+
     return NextResponse.json(supplier);
   } catch (error) {
     return handlePrismaError(error);

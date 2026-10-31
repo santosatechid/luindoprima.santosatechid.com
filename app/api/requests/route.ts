@@ -74,7 +74,7 @@ export async function POST(request: NextRequest) {
     }
 
     const stock = await prisma.item.findMany({
-      where: { id: { in: [...needed.keys()] } },
+      where: { id: { in: [...needed.keys()] }, deletedAt: null },
       select: {
         id: true,
         name: true,

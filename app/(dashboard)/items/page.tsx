@@ -7,6 +7,7 @@ import {
   Plus,
   Search,
   SlidersHorizontal,
+  Trash2,
 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -14,6 +15,16 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/shell/page-header";
 import { EmptyState } from "@/components/shell/stat-card";
 import { StatusBadge } from "@/components/shell/status-badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alertDialog";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -40,6 +51,9 @@ import {
   useCreateItem,
   useCreateItemCategory,
   useCreateSupplier,
+  useDeleteItem,
+  useDeleteItemCategory,
+  useDeleteSupplier,
   useItemCategories,
   useItems,
   useSuppliers,
@@ -82,6 +96,14 @@ export default function ItemsPage() {
   const createSupplier = useCreateSupplier();
   const updateItem = useUpdateItem();
   const updateCategory = useUpdateItemCategory();
+  const deleteItem = useDeleteItem();
+  const deleteCategory = useDeleteItemCategory();
+  const deleteSupplier = useDeleteSupplier();
+  const [confirmTarget, setConfirmTarget] = useState<{
+    kind: "item" | "category" | "supplier";
+    id: string;
+    label: string;
+  } | null>(null);
 
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("ALL");
@@ -237,6 +259,25 @@ export default function ItemsPage() {
     toast.success("Supplier ditambahkan.");
     setSupplierForm(EMPTY_SUPPLIER);
     setSupplierOpen(false);
+  };
+
+  const confirmDelete = async () => {
+    if (!confirmTarget) return;
+    try {
+      if (confirmTarget.kind === "item") {
+        await deleteItem.mutateAsync(confirmTarget.id);
+      } else if (confirmTarget.kind === "category") {
+        await deleteCategory.mutateAsync(confirmTarget.id);
+      } else {
+        await deleteSupplier.mutateAsync(confirmTarget.id);
+      }
+      toast.success("Data dihapus.");
+      setConfirmTarget(null);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Gagal menghapus data.",
+      );
+    }
   };
 
   const saveAlerts = async () => {
@@ -657,6 +698,39 @@ export default function ItemsPage() {
         }
       />
 
+      <AlertDialog
+        open={confirmTarget !== null}
+        onOpenChange={(open) => {
+          if (!open) setConfirmTarget(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Hapus data ini?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmTarget?.label} akan dihapus dari daftar. Data transaksi
+              lama tetap tersimpan.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Batal</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(event) => {
+                event.preventDefault();
+                void confirmDelete();
+              }}
+              disabled={
+                deleteItem.isPending ||
+                deleteCategory.isPending ||
+                deleteSupplier.isPending
+              }
+            >
+              Hapus
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <Tabs defaultValue="items" className="gap-4">
         <TabsList className="h-auto flex-wrap justify-start gap-1 rounded-none bg-transparent p-0">
           {[
@@ -762,7 +836,7 @@ export default function ItemsPage() {
                     <TableHead className="w-20">Satuan</TableHead>
                     <TableHead className="w-20">Minimum</TableHead>
                     <TableHead className="w-28">Status</TableHead>
-                    <TableHead className="w-12" />
+                    <TableHead className="w-40" />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -810,14 +884,31 @@ export default function ItemsPage() {
                         />
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="xs"
-                          onClick={() => openEditItem(item)}
-                        >
-                          <Pencil />
-                          Edit
-                        </Button>
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            onClick={() => openEditItem(item)}
+                          >
+                            <Pencil />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() =>
+                              setConfirmTarget({
+                                kind: "item",
+                                id: item.id,
+                                label: `${item.code} · ${item.name}`,
+                              })
+                            }
+                          >
+                            <Trash2 />
+                            Hapus
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -868,14 +959,31 @@ export default function ItemsPage() {
                       {row._count?.items ?? 0}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="xs"
-                        onClick={() => openCategoryDialog(row)}
-                      >
-                        <Pencil />
-                        Edit
-                      </Button>
+                      <div className="flex justify-end gap-1">
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          onClick={() => openCategoryDialog(row)}
+                        >
+                          <Pencil />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() =>
+                            setConfirmTarget({
+                              kind: "category",
+                              id: row.id,
+                              label: `${row.code} · ${row.name}`,
+                            })
+                          }
+                        >
+                          <Trash2 />
+                          Hapus
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))}
@@ -926,6 +1034,7 @@ export default function ItemsPage() {
                   <TableHead>Email</TableHead>
                   <TableHead className="w-24">Item</TableHead>
                   <TableHead className="w-24">Status</TableHead>
+                  <TableHead className="w-24" />
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -951,6 +1060,23 @@ export default function ItemsPage() {
                         status={supplier.isActive ? "SAFE" : "DRAFT"}
                         label={supplier.isActive ? "Aktif" : "Nonaktif"}
                       />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="xs"
+                        className="text-destructive hover:text-destructive"
+                        onClick={() =>
+                          setConfirmTarget({
+                            kind: "supplier",
+                            id: supplier.id,
+                            label: supplier.name,
+                          })
+                        }
+                      >
+                        <Trash2 />
+                        Hapus
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}

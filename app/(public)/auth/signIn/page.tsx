@@ -13,17 +13,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authClient, signIn } from "@/services/auth/authClients";
 
-const DEMO = [
-  { email: "admin@luindoprima.co.id", role: "Admin" },
-  { email: "direktur@luindoprima.co.id", role: "Direktur" },
-  { email: "leader@luindoprima.co.id", role: "Leader" },
-];
-
 export default function SignIn() {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const [email, setEmail] = useState("admin@luindoprima.co.id");
-  const [password, setPassword] = useState("luindo123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
 
@@ -174,37 +168,8 @@ export default function SignIn() {
             </Button>
           </form>
 
-          <div className="my-4 flex items-center gap-2.5">
-            <span className="bg-border h-px flex-1" />
-            <span className="text-muted-foreground text-[10.5px]">
-              Akun demo
-            </span>
-            <span className="bg-border h-px flex-1" />
-          </div>
-
-          <div className="flex flex-col gap-1.5">
-            {DEMO.map((account) => (
-              <button
-                key={account.email}
-                type="button"
-                onClick={() => {
-                  setEmail(account.email);
-                  setPassword("luindo123");
-                }}
-                className="bg-muted hover:bg-secondary flex w-full items-center justify-between rounded-md px-2.5 py-1.5 text-left"
-              >
-                <span className="text-muted-foreground text-[11px]">
-                  {account.email}
-                </span>
-                <span className="text-[10.5px] font-medium">
-                  {account.role}
-                </span>
-              </button>
-            ))}
-          </div>
-
           <p className="text-muted-foreground mt-4 text-[10px]">
-            Sandi demo: luindo123 · Dikembangkan oleh PT Santosa Tech Indonesia
+            Dikembangkan oleh PT Santosa Tech Indonesia
           </p>
         </div>
       </section>

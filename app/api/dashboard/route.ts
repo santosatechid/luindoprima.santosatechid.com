@@ -34,7 +34,10 @@ export async function GET() {
     onSiteCount,
     completedCount,
   ] = await Promise.all([
-      prisma.item.findMany({ orderBy: { code: "asc" } }),
+      prisma.item.findMany({
+        where: { deletedAt: null },
+        orderBy: { code: "asc" },
+      }),
       prisma.incoming.findMany({
         where: { receivedAt: { gte: startMonth } },
         include: { items: true },

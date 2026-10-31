@@ -43,6 +43,20 @@ export async function POST(request: NextRequest) {
     const number = `BM-${year}-${String(count + 1).padStart(4, "0")}`;
 
     const incoming = await prisma.$transaction(async (tx) => {
+      const supplier = await tx.supplier.findFirst({
+        where: { id: body.supplierId, deletedAt: null },
+        select: { id: true },
+      });
+      if (!supplier) throw new Error("Supplier sudah dihapus.");
+
+      const itemIds = [...new Set(rows.map((row) => row.itemId))];
+      const liveItems = await tx.item.count({
+        where: { id: { in: itemIds }, deletedAt: null },
+      });
+      if (liveItems !== itemIds.length) {
+        throw new Error("Ada item yang sudah dihapus.");
+      }
+
       const created = await tx.incoming.create({
         data: {
           number,
@@ -83,6 +97,13 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(incoming, { status: 201 });
   } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message === "Supplier sudah dihapus." ||
+        error.message === "Ada item yang sudah dihapus.")
+    ) {
+      return bad(error.message);
+    }
     return handlePrismaError(error);
   }
 }

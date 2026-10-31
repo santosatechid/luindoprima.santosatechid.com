@@ -15,6 +15,7 @@ export async function GET() {
   if (g.error) return g.error;
 
   const items = await prisma.item.findMany({
+    where: { deletedAt: null },
     include,
     orderBy: { code: "asc" },
   });
@@ -42,9 +43,15 @@ async function createWithAutoCode(
 ) {
   for (let attempt = 0; attempt < 10; attempt += 1) {
     const { categoryId, ...fields } = data;
-    const category = await tx.itemCategory.update({
-      where: { id: categoryId },
+    const bumped = await tx.itemCategory.updateMany({
+      where: { id: categoryId, deletedAt: null },
       data: { lastNumber: { increment: 1 } },
+    });
+    if (bumped.count === 0) {
+      throw new Error("Kategori sudah dihapus.");
+    }
+    const category = await tx.itemCategory.findUniqueOrThrow({
+      where: { id: categoryId },
     });
     const code = `${category.code}-${String(category.lastNumber).padStart(3, "0")}`;
     const taken = await tx.item.findUnique({
@@ -71,6 +78,13 @@ export async function POST(request: NextRequest) {
       return bad("Nama, kategori, dan satuan wajib diisi.");
     }
 
+    if (body.supplierId) {
+      const liveSupplier = await prisma.supplier.count({
+        where: { id: body.supplierId, deletedAt: null },
+      });
+      if (liveSupplier === 0) return bad("Supplier sudah dihapus.");
+    }
+
     const item = await prisma.$transaction((tx) =>
       createWithAutoCode(tx, {
         categoryId: body.categoryId,
@@ -95,6 +109,9 @@ export async function POST(request: NextRequest) {
     });
     return NextResponse.json(item, { status: 201 });
   } catch (error) {
+    if (error instanceof Error && error.message === "Kategori sudah dihapus.") {
+      return bad("Kategori sudah dihapus.");
+    }
     return handlePrismaError(error);
   }
 }
@@ -109,6 +126,24 @@ export async function PUT(request: NextRequest) {
     if (!body.id) return bad("ID item wajib diisi.");
     if (!body.name || !body.categoryId || !body.unit) {
       return bad("Nama, kategori, dan satuan wajib diisi.");
+    }
+
+    const live = await prisma.item.findFirst({
+      where: { id: body.id, deletedAt: null },
+      select: { id: true },
+    });
+    if (!live) return bad("Item tidak ditemukan atau sudah dihapus.");
+
+    const liveCategory = await prisma.itemCategory.count({
+      where: { id: body.categoryId, deletedAt: null },
+    });
+    if (liveCategory === 0) return bad("Kategori sudah dihapus.");
+
+    if (body.supplierId) {
+      const liveSupplier = await prisma.supplier.count({
+        where: { id: body.supplierId, deletedAt: null },
+      });
+      if (liveSupplier === 0) return bad("Supplier sudah dihapus.");
     }
 
     const item = await prisma.item.update({
@@ -148,10 +183,41 @@ export async function DELETE(request: NextRequest) {
   try {
     const { id } = await request.json();
     if (!id) return bad("ID item wajib diisi.");
-    const item = await prisma.item.update({
-      where: { id },
-      data: { isActive: false },
+
+    const res = await prisma.item.updateMany({
+      where: {
+        id,
+        deletedAt: null,
+        stockGudang: 0,
+        stockOperasional: 0,
+        onRequest: 0,
+      },
+      data: { isActive: false, deletedAt: new Date() },
     });
+
+    if (res.count === 0) {
+      const existing = await prisma.item.findUnique({
+        where: { id },
+        select: { id: true, deletedAt: true },
+      });
+      if (!existing || existing.deletedAt) {
+        return bad("Item tidak ditemukan atau sudah dihapus.");
+      }
+      return bad("Item masih punya stok atau permintaan berjalan. Kosongkan stok dulu.");
+    }
+
+    const item = await prisma.item.findUniqueOrThrow({ where: { id } });
+
+    await prisma.auditLog.create({
+      data: {
+        actorId: g.user.id,
+        action: "DELETE",
+        entity: "item",
+        entityId: item.id,
+        meta: JSON.stringify({ code: item.code }),
+      },
+    });
+
     return NextResponse.json(item);
   } catch (error) {
     return handlePrismaError(error);

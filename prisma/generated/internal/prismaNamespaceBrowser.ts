@@ -179,6 +179,7 @@ export const SupplierScalarFieldEnum = {
   email: 'email',
   address: 'address',
   isActive: 'isActive',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -192,6 +193,7 @@ export const ItemCategoryScalarFieldEnum = {
   name: 'name',
   lastNumber: 'lastNumber',
   isActive: 'isActive',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -213,6 +215,7 @@ export const ItemScalarFieldEnum = {
   minStock: 'minStock',
   supplierId: 'supplierId',
   isActive: 'isActive',
+  deletedAt: 'deletedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

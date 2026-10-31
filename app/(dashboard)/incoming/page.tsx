@@ -272,7 +272,7 @@ export default function IncomingPage() {
           </div>
 
           <div className="grid gap-1.5">
-            <Label className="text-[11.5px]">Nomor dokumen supplier</Label>
+            <Label className="text-[11.5px]">Nomor PO supplier</Label>
             <Input
               value={documentNo}
               placeholder="DO/SNT/2026/1024"

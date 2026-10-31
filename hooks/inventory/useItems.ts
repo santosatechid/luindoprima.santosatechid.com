@@ -70,6 +70,20 @@ export const useUpdateItemCategory = () => {
   });
 };
 
+export const useDeleteItemCategory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) =>
+      (
+        await apiDelete<ItemCategory>("/api/item-categories", {
+          body: JSON.stringify({ id }),
+        })
+      ).data,
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["item-categories"] }),
+  });
+};
+
 export const useSuppliers = () =>
   useQuery({
     queryKey: ["suppliers"],
@@ -105,13 +119,18 @@ export const useUpdateItem = () => {
   });
 };
 
-export const useDeactivateItem = () => {
+export const useDeleteItem = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) =>
       (await apiDelete<Item>("/api/items", { body: JSON.stringify({ id }) }))
         .data,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["items"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["items"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["item-categories"] });
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+    },
   });
 };
 
@@ -130,5 +149,21 @@ export const useUpdateSupplier = () => {
     mutationFn: async (data: SupplierInput) =>
       (await apiPut<Supplier>("/api/suppliers", data)).data,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["suppliers"] }),
+  });
+};
+
+export const useDeleteSupplier = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) =>
+      (
+        await apiDelete<Supplier>("/api/suppliers", {
+          body: JSON.stringify({ id }),
+        })
+      ).data,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["suppliers"] });
+      queryClient.invalidateQueries({ queryKey: ["items"] });
+    },
   });
 };
