@@ -185,25 +185,12 @@ export async function DELETE(request: NextRequest) {
     if (!id) return bad("ID item wajib diisi.");
 
     const res = await prisma.item.updateMany({
-      where: {
-        id,
-        deletedAt: null,
-        stockGudang: 0,
-        stockOperasional: 0,
-        onRequest: 0,
-      },
+      where: { id, deletedAt: null },
       data: { isActive: false, deletedAt: new Date() },
     });
 
     if (res.count === 0) {
-      const existing = await prisma.item.findUnique({
-        where: { id },
-        select: { id: true, deletedAt: true },
-      });
-      if (!existing || existing.deletedAt) {
-        return bad("Item tidak ditemukan atau sudah dihapus.");
-      }
-      return bad("Item masih punya stok atau permintaan berjalan. Kosongkan stok dulu.");
+      return bad("Item tidak ditemukan atau sudah dihapus.");
     }
 
     const item = await prisma.item.findUniqueOrThrow({ where: { id } });
