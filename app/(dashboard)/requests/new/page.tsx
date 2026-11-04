@@ -10,14 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SearchableSelect } from "@/components/ui/searchable-select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useCustomers } from "@/hooks/inventory/useCustomers";
 import { useItems } from "@/hooks/inventory/useItems";
@@ -212,88 +204,116 @@ export default function NewRequestPage() {
               </p>
             </div>
 
-            <div className="overflow-hidden rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Item</TableHead>
-                    <TableHead className="w-20">Stok</TableHead>
-                    <TableHead className="w-24">Di request</TableHead>
-                    <TableHead className="w-24">Tersedia</TableHead>
-                    <TableHead className="w-28">Jumlah</TableHead>
-                    <TableHead className="w-16" />
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {chosen.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        className="text-muted-foreground py-6 text-center text-xs"
-                      >
-                        Belum ada item dipilih.
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    chosen.map((row) => {
-                      const item = items.find((entry) => entry.id === row.itemId);
-                      if (!item) return null;
-                      return (
-                        <TableRow key={row.itemId}>
-                          <TableCell>
-                            <p className="text-xs font-medium">{item.name}</p>
-                            <p className="text-muted-foreground text-[10.5px]">
-                              {item.code} · {item.brand ?? "—"}
-                            </p>
-                          </TableCell>
-                          <TableCell className="text-xs">
-                            {item.stockGudang} {item.unit}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground text-xs">
-                            {item.onRequest} {item.unit}
-                          </TableCell>
-                          <TableCell className="text-xs font-medium">
-                            {item.stockGudang - item.onRequest} {item.unit}
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              type="number"
-                              min={1}
-                              max={item.stockGudang - item.onRequest}
-                              value={row.qty}
-                              onChange={(event) =>
-                                setRows((current) =>
-                                  current.map((entry) =>
-                                    entry.itemId === row.itemId
-                                      ? { ...entry, qty: event.target.value }
-                                      : entry,
-                                  ),
-                                )
-                              }
-                              className="input-number h-8 w-24 px-2"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Button
-                              variant="ghost"
-                              size="icon-sm"
-                              onClick={() =>
-                                setRows((current) =>
-                                  current.filter(
-                                    (entry) => entry.itemId !== row.itemId,
-                                  ),
-                                )
+            <div className="border-border divide-border divide-y rounded-lg border">
+              {chosen.length === 0 ? (
+                <p className="text-muted-foreground px-4 py-8 text-center text-xs">
+                  Belum ada item dipilih.
+                </p>
+              ) : (
+                chosen.map((row) => {
+                  const item = items.find((entry) => entry.id === row.itemId);
+                  if (!item) return null;
+                  const available = item.stockGudang - item.onRequest;
+                  return (
+                    <div
+                      key={row.itemId}
+                      className="flex flex-col gap-3 p-3.5 sm:flex-row sm:items-center sm:gap-4"
+                    >
+                      <div className="flex min-w-0 items-start justify-between gap-3 sm:flex-[1.4]">
+                        <div className="min-w-0">
+                          <p className="text-xs font-medium">{item.name}</p>
+                          <p className="text-muted-foreground text-[10.5px]">
+                            {item.code} · {item.brand ?? "—"}
+                          </p>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="-mt-1 shrink-0 sm:hidden"
+                          aria-label={`Hapus ${item.name}`}
+                          onClick={() =>
+                            setRows((current) =>
+                              current.filter(
+                                (entry) => entry.itemId !== row.itemId,
+                              ),
+                            )
+                          }
+                        >
+                          <Trash2 />
+                        </Button>
+                      </div>
+
+                      <dl className="border-border grid grid-cols-3 gap-2 border-t pt-2.5 sm:flex sm:shrink-0 sm:gap-5 sm:border-t-0 sm:pt-0">
+                        {[
+                          ["Stok", `${item.stockGudang} ${item.unit}`],
+                          ["Di request", `${item.onRequest} ${item.unit}`],
+                          ["Tersedia", `${available} ${item.unit}`],
+                        ].map(([label, value], index) => (
+                          <div key={label}>
+                            <dt className="text-muted-foreground text-[10px]">
+                              {label}
+                            </dt>
+                            <dd
+                              className={
+                                index === 2
+                                  ? "text-xs font-medium tabular-nums"
+                                  : "text-muted-foreground text-xs tabular-nums"
                               }
                             >
-                              <Trash2 />
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })
-                  )}
-                </TableBody>
-              </Table>
+                              {value}
+                            </dd>
+                          </div>
+                        ))}
+                      </dl>
+
+                      <div className="flex items-center gap-2 sm:shrink-0">
+                        <Label
+                          htmlFor={`qty-${row.itemId}`}
+                          className="text-[11.5px]"
+                        >
+                          Jumlah
+                        </Label>
+                        <Input
+                          id={`qty-${row.itemId}`}
+                          type="number"
+                          inputMode="numeric"
+                          min={1}
+                          max={available}
+                          value={row.qty}
+                          onChange={(event) =>
+                            setRows((current) =>
+                              current.map((entry) =>
+                                entry.itemId === row.itemId
+                                  ? { ...entry, qty: event.target.value }
+                                  : entry,
+                              ),
+                            )
+                          }
+                          className="input-number h-9 w-20 px-2 tabular-nums"
+                        />
+                        <span className="text-muted-foreground text-[11px]">
+                          {item.unit}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          className="ml-auto hidden sm:inline-flex"
+                          aria-label={`Hapus ${item.name}`}
+                          onClick={() =>
+                            setRows((current) =>
+                              current.filter(
+                                (entry) => entry.itemId !== row.itemId,
+                              ),
+                            )
+                          }
+                        >
+                          <Trash2 />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
             </div>
 
             <div className="flex flex-col gap-2 sm:flex-row">
