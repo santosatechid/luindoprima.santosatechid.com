@@ -78,7 +78,7 @@ export default function TurnoverPage() {
   });
 
   function valueFor(itemId: string) {
-    return values[itemId] ?? { used: "0", returned: "0", damaged: "0" };
+    return values[itemId] ?? { used: "", returned: "", damaged: "" };
   }
 
   async function submit() {
@@ -226,6 +226,7 @@ export default function TurnoverPage() {
                                       min={0}
                                       max={row.qty}
                                       inputMode="numeric"
+                                      placeholder="0"
                                       className="input-number h-8 w-full min-w-[88px] px-2"
                                       value={value[field]}
                                       onChange={(event) =>
