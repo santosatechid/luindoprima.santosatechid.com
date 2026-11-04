@@ -11,6 +11,7 @@ import {
   Inbox,
   LayoutDashboard,
   LogOut,
+  MessageSquare,
   Package,
   RotateCcw,
   Truck,
@@ -122,6 +123,12 @@ const NAV: NavGroup[] = [
         roles: ["ADMIN", "DIREKTUR"],
       },
       {
+        title: "Log WhatsApp",
+        url: "/notifications",
+        icon: MessageSquare,
+        roles: ["ADMIN"],
+      },
+      {
         title: "Pengguna",
         url: "/users",
         icon: Users,
@@ -144,6 +151,7 @@ const TITLES: Record<string, string> = {
   "/items": "Master Item & Supplier",
   "/stock": "Stok Inventory",
   "/reports": "Laporan",
+  "/notifications": "Log WhatsApp",
   "/users": "Manajemen Pengguna",
 };
 

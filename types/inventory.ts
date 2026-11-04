@@ -221,3 +221,17 @@ export type AppUser = {
   banned: boolean | null;
   createdAt: string;
 };
+
+export type NotificationLog = {
+  id: string;
+  target: string;
+  targetName: string | null;
+  role: string | null;
+  subject: string;
+  message: string;
+  status: string;
+  error: string | null;
+  entity: string | null;
+  entityId: string | null;
+  createdAt: string;
+};

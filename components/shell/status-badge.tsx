@@ -68,6 +68,22 @@ const STYLES: Record<string, { label: string; className: string; dot: string }> 
       "bg-destructive-surface text-destructive-strong border-destructive-border",
     dot: "bg-destructive-solid",
   },
+  SENT: {
+    label: "Terkirim",
+    className: "bg-success-surface text-success border-success-border",
+    dot: "bg-success-solid",
+  },
+  FAILED: {
+    label: "Gagal",
+    className:
+      "bg-destructive-surface text-destructive-strong border-destructive-border",
+    dot: "bg-destructive-solid",
+  },
+  SKIPPED: {
+    label: "Dilewati",
+    className: "bg-warning-surface text-warning border-warning-border",
+    dot: "bg-warning-solid",
+  },
 };
 
 export function StatusBadge({

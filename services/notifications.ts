@@ -8,9 +8,15 @@ type NotificationPayload = {
   entityId?: string;
 };
 
-const EVO_URL = process.env.NEXT_PUBLIC_EVO_URL;
-const EVO_KEY = process.env.NEXT_PUBLIC_EVO_APIKEY;
-const EVO_INSTANCE = process.env.NEXT_PUBLIC_EVO_INSTANCE;
+/**
+ * Nama server-only (EVO_*) dibaca saat runtime, jadi kredensial bisa diganti
+ * tanpa rebuild. Fallback NEXT_PUBLIC_* hanya untuk .env lama: nilai itu
+ * di-inline saat build, sehingga build tanpa env = gateway mati selamanya.
+ */
+const EVO_URL = process.env.EVO_URL || process.env.NEXT_PUBLIC_EVO_URL;
+const EVO_KEY = process.env.EVO_APIKEY || process.env.NEXT_PUBLIC_EVO_APIKEY;
+const EVO_INSTANCE =
+  process.env.EVO_INSTANCE || process.env.NEXT_PUBLIC_EVO_INSTANCE;
 
 /** 0812… / 812… → 62812…; anything already international is kept. */
 export function normalizePhone(raw: string | null | undefined) {
