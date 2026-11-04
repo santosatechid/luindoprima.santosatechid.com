@@ -30,7 +30,7 @@ export default function NewRequestPage() {
   const [neededAt, setNeededAt] = useState(todayInput());
   const [estimatedDoneAt, setEstimatedDoneAt] = useState("");
   const [note, setNote] = useState("");
-  const [rows, setRows] = useState<Row[]>([{ itemId: "", qty: "1" }]);
+  const [rows, setRows] = useState<Row[]>([{ itemId: "", qty: "" }]);
   const [picker, setPicker] = useState("");
 
   const chosen = rows.filter((row) => row.itemId);
@@ -43,7 +43,7 @@ export default function NewRequestPage() {
     }
     setRows((current) => [
       ...current.filter((row) => row.itemId),
-      { itemId: picker, qty: "1" },
+      { itemId: picker, qty: "" },
     ]);
     setPicker("");
   }
@@ -279,6 +279,7 @@ export default function NewRequestPage() {
                           inputMode="numeric"
                           min={1}
                           max={available}
+                          placeholder="0"
                           value={row.qty}
                           onChange={(event) =>
                             setRows((current) =>
