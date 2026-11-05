@@ -63,6 +63,7 @@ import {
 import { useTurnovers } from "@/hooks/inventory/useTurnovers";
 import { TableSkeleton } from "@/components/shell/loading-state";
 import { formatDate } from "@/lib/format";
+import { authClient } from "@/services/auth/authClients";
 import type { Item } from "@/types/inventory";
 
 const EMPTY_ITEM = {
@@ -87,10 +88,14 @@ const EMPTY_SUPPLIER = {
 };
 
 export default function ItemsPage() {
+  const { data: session } = authClient.useSession();
+  const isAdmin =
+    (session?.user as { role?: string } | undefined)?.role === "ADMIN";
   const { data: items = [], isLoading } = useItems();
   const { data: suppliers = [] } = useSuppliers();
   const { data: categories = [] } = useItemCategories();
-  const { data: turnovers = [], isLoading: turnoversLoading } = useTurnovers();
+  const { data: turnovers = [], isLoading: turnoversLoading } =
+    useTurnovers(true);
   const createItem = useCreateItem();
   const createCategory = useCreateItemCategory();
   const createSupplier = useCreateSupplier();
@@ -308,6 +313,7 @@ export default function ItemsPage() {
         title="Master Item & Supplier"
         description="Daftar consumable, kategori, dan supplier yang dipakai pekerjaan inspeksi."
         actions={
+          isAdmin ? (
           <>
             <Dialog open={alertOpen} onOpenChange={setAlertOpen}>
               <DialogTrigger asChild>
@@ -695,6 +701,7 @@ export default function ItemsPage() {
               </DialogContent>
             </Dialog>
           </>
+          ) : null
         }
       />
 
@@ -884,31 +891,33 @@ export default function ItemsPage() {
                         />
                       </TableCell>
                       <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            variant="ghost"
-                            size="xs"
-                            onClick={() => openEditItem(item)}
-                          >
-                            <Pencil />
-                            Edit
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="xs"
-                            className="text-destructive hover:text-destructive"
-                            onClick={() =>
-                              setConfirmTarget({
-                                kind: "item",
-                                id: item.id,
-                                label: `${item.code} · ${item.name}`,
-                              })
-                            }
-                          >
-                            <Trash2 />
-                            Hapus
-                          </Button>
-                        </div>
+                        {isAdmin ? (
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="xs"
+                              onClick={() => openEditItem(item)}
+                            >
+                              <Pencil />
+                              Edit
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="xs"
+                              className="text-destructive hover:text-destructive"
+                              onClick={() =>
+                                setConfirmTarget({
+                                  kind: "item",
+                                  id: item.id,
+                                  label: `${item.code} · ${item.name}`,
+                                })
+                              }
+                            >
+                              <Trash2 />
+                              Hapus
+                            </Button>
+                          </div>
+                        ) : null}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -926,17 +935,19 @@ export default function ItemsPage() {
             <p className="text-muted-foreground text-[11.5px]">
               Kode kategori menjadi prefix kode item otomatis.
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                setCategoryForItem(false);
-                openCategoryDialog();
-              }}
-            >
-              <Plus />
-              Tambah Kategori
-            </Button>
+            {isAdmin ? (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setCategoryForItem(false);
+                  openCategoryDialog();
+                }}
+              >
+                <Plus />
+                Tambah Kategori
+              </Button>
+            ) : null}
           </div>
           <div className="bg-card border-border overflow-hidden rounded-xl border">
             <Table>
@@ -959,31 +970,33 @@ export default function ItemsPage() {
                       {row._count?.items ?? 0}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-1">
-                        <Button
-                          variant="ghost"
-                          size="xs"
-                          onClick={() => openCategoryDialog(row)}
-                        >
-                          <Pencil />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="xs"
-                          className="text-destructive hover:text-destructive"
-                          onClick={() =>
-                            setConfirmTarget({
-                              kind: "category",
-                              id: row.id,
-                              label: `${row.code} · ${row.name}`,
-                            })
-                          }
-                        >
-                          <Trash2 />
-                          Hapus
-                        </Button>
-                      </div>
+                      {isAdmin ? (
+                        <div className="flex justify-end gap-1">
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            onClick={() => openCategoryDialog(row)}
+                          >
+                            <Pencil />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="xs"
+                            className="text-destructive hover:text-destructive"
+                            onClick={() =>
+                              setConfirmTarget({
+                                kind: "category",
+                                id: row.id,
+                                label: `${row.code} · ${row.name}`,
+                              })
+                            }
+                          >
+                            <Trash2 />
+                            Hapus
+                          </Button>
+                        </div>
+                      ) : null}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -1062,21 +1075,23 @@ export default function ItemsPage() {
                       />
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="xs"
-                        className="text-destructive hover:text-destructive"
-                        onClick={() =>
-                          setConfirmTarget({
-                            kind: "supplier",
-                            id: supplier.id,
-                            label: supplier.name,
-                          })
-                        }
-                      >
-                        <Trash2 />
-                        Hapus
-                      </Button>
+                      {isAdmin ? (
+                        <Button
+                          variant="ghost"
+                          size="xs"
+                          className="text-destructive hover:text-destructive"
+                          onClick={() =>
+                            setConfirmTarget({
+                              kind: "supplier",
+                              id: supplier.id,
+                              label: supplier.name,
+                            })
+                          }
+                        >
+                          <Trash2 />
+                          Hapus
+                        </Button>
+                      ) : null}
                     </TableCell>
                   </TableRow>
                 ))}

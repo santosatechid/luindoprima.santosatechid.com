@@ -31,9 +31,26 @@ const build = (vars: Vars, rows: Row[]) =>
     .join("\n");
 
 type ItemLine = {
-  item: { name: string; unit: string };
+  item: {
+    name: string;
+    unit: string;
+    stockGudang?: number;
+    minStock?: number;
+  };
   qty?: number;
   brought?: number;
+};
+
+/** Sisa stok gudang + status, mengikuti ambang batas halaman Stok. */
+const stockInfo = (item: ItemLine["item"]) => {
+  if (item.stockGudang === undefined) return "";
+  const status =
+    item.stockGudang === 0
+      ? "Habis"
+      : item.stockGudang <= (item.minStock ?? 0)
+        ? "Menipis"
+        : "Aman";
+  return ` | sisa ${item.stockGudang} ${item.unit} (${status})`;
 };
 
 export const formatItems = (rows: ItemLine[]) =>
@@ -42,7 +59,7 @@ export const formatItems = (rows: ItemLine[]) =>
     : `\n${rows
         .map(
           (row) =>
-            `  • ${row.item.name} — ${row.qty ?? row.brought ?? 0} ${row.item.unit}`,
+            `  • ${row.item.name} — ${row.qty ?? row.brought ?? 0} ${row.item.unit}${stockInfo(row.item)}`,
         )
         .join("\n")}`;
 

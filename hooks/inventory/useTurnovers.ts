@@ -18,10 +18,15 @@ export type TurnoverInput = {
   }[];
 };
 
-export const useTurnovers = () =>
+export const useTurnovers = (all = false) =>
   useQuery({
-    queryKey: ["turnovers"],
-    queryFn: async () => (await apiGet<Turnover[]>("/api/turnovers")).data,
+    queryKey: ["turnovers", all],
+    queryFn: async () =>
+      (
+        await apiGet<Turnover[]>("/api/turnovers", {
+          params: all ? { all: 1 } : undefined,
+        })
+      ).data,
     ...CACHE_STRATEGIES.dynamic,
   });
 

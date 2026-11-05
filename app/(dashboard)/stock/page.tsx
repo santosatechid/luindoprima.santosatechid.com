@@ -53,8 +53,8 @@ export default function StockPage() {
   } = useItems({ staleTime: 30 * 1000 });
   const { data: suppliers = [] } = useSuppliers();
   const { data: categories = [] } = useItemCategories();
-  const { data: notes = [] } = useDeliveryNotes();
-  const { data: turnovers = [] } = useTurnovers();
+  const { data: notes = [] } = useDeliveryNotes(true);
+  const { data: turnovers = [] } = useTurnovers(true);
 
   const [tab, setTab] = useState("stock");
   const [search, setSearch] = useState("");

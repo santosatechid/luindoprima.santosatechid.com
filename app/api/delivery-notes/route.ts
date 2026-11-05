@@ -24,13 +24,16 @@ const include = {
   turnover: { select: { id: true, status: true } },
 } as const;
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const g = await guard();
   if (g.error) return g.error;
 
+  // Stok gudang menampilkan pergerakan semua leader; leader hanya bisa baca.
+  const all = request.nextUrl.searchParams.get("all") === "1";
+
   const rows = await prisma.deliveryNote.findMany({
     where:
-      g.user.role === "LEADER"
+      g.user.role === "LEADER" && !all
         ? { request: { leaderId: g.user.id } }
         : undefined,
     include,

@@ -108,13 +108,13 @@ const NAV: NavGroup[] = [
         title: "Master Item & Supplier",
         url: "/items",
         icon: Package,
-        roles: ["ADMIN"],
+        roles: ["ADMIN", "LEADER"],
       },
       {
         title: "Stok Inventory",
         url: "/stock",
         icon: Warehouse,
-        roles: ["DIREKTUR"],
+        roles: ["DIREKTUR", "LEADER"],
       },
       {
         title: "Laporan",

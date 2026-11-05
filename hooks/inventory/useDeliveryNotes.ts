@@ -6,11 +6,15 @@ import { CACHE_STRATEGIES } from "@/app/providers";
 import { apiGet, apiPatch, apiPost } from "@/lib/http/apiClient";
 import type { DeliveryNote } from "@/types/inventory";
 
-export const useDeliveryNotes = () =>
+export const useDeliveryNotes = (all = false) =>
   useQuery({
-    queryKey: ["delivery-notes"],
+    queryKey: ["delivery-notes", all],
     queryFn: async () =>
-      (await apiGet<DeliveryNote[]>("/api/delivery-notes")).data,
+      (
+        await apiGet<DeliveryNote[]>("/api/delivery-notes", {
+          params: all ? { all: 1 } : undefined,
+        })
+      ).data,
     ...CACHE_STRATEGIES.dynamic,
   });
 
