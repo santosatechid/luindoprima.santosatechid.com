@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus, Send, Trash2 } from "lucide-react";
+import { Check, Plus, Send, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -13,15 +13,19 @@ import { SearchableSelect } from "@/components/ui/searchable-select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCustomers } from "@/hooks/inventory/useCustomers";
 import { useItems } from "@/hooks/inventory/useItems";
+import { usePersonnel } from "@/hooks/inventory/usePersonnel";
 import { useCreateRequest } from "@/hooks/inventory/useRequests";
 import { formatDate, todayInput } from "@/lib/format";
+import { cn } from "@/lib/shadcn/utils";
 
 type Row = { itemId: string; qty: string };
+type Crew = { key: string; name: string; position: string };
 
 export default function NewRequestPage() {
   const router = useRouter();
   const { data: items = [] } = useItems();
   const { data: customers = [] } = useCustomers();
+  const { data: personnel = [] } = usePersonnel();
   const createRequest = useCreateRequest();
 
   const [poNo, setPoNo] = useState("");
@@ -32,8 +36,41 @@ export default function NewRequestPage() {
   const [note, setNote] = useState("");
   const [rows, setRows] = useState<Row[]>([{ itemId: "", qty: "" }]);
   const [picker, setPicker] = useState("");
+  const [crew, setCrew] = useState<Crew[]>([]);
+  const [manualName, setManualName] = useState("");
+  const [manualPosition, setManualPosition] = useState("");
 
   const chosen = rows.filter((row) => row.itemId);
+  const roster = personnel.filter((person) => person.isActive);
+  const assigned = crew;
+
+  function toggleCrew(person: { id: string; name: string; position: string }) {
+    setCrew((current) =>
+      current.some((entry) => entry.key === person.id)
+        ? current.filter((entry) => entry.key !== person.id)
+        : [
+            ...current,
+            { key: person.id, name: person.name, position: person.position },
+          ],
+    );
+  }
+
+  function addManual() {
+    if (!manualName.trim() || !manualPosition.trim()) {
+      toast.error("Nama dan jabatan personel manual wajib diisi.");
+      return;
+    }
+    setCrew((current) => [
+      ...current,
+      {
+        key: `manual-${Date.now()}`,
+        name: manualName.trim(),
+        position: manualPosition.trim(),
+      },
+    ]);
+    setManualName("");
+    setManualPosition("");
+  }
 
   function addRow() {
     if (!picker) return;
@@ -59,6 +96,10 @@ export default function NewRequestPage() {
       toast.error("Jumlah item harus lebih dari nol.");
       return;
     }
+    if (assigned.length === 0) {
+      toast.error("Pilih minimal satu personel untuk surat tugas.");
+      return;
+    }
     for (const row of chosen) {
       const item = items.find((entry) => entry.id === row.itemId);
       if (!item) continue;
@@ -78,6 +119,10 @@ export default function NewRequestPage() {
       neededAt,
       estimatedDoneAt: estimatedDoneAt || undefined,
       note: note || undefined,
+      personnel: assigned.map((person) => ({
+        name: person.name,
+        position: person.position,
+      })),
       items: chosen.map((row) => ({
         itemId: row.itemId,
         qty: Number(row.qty),
@@ -93,7 +138,7 @@ export default function NewRequestPage() {
     <div className="flex flex-col gap-5">
       <PageHeader
         title="Buat Permintaan Baru"
-        description="Isi data pekerjaan dan pilih item. Permintaan dikirim ke Admin untuk dicek stoknya."
+        description="Isi data pekerjaan, tugaskan personel, lalu pilih item. Permintaan dikirim ke Admin untuk dicek stoknya."
         actions={
           <>
             <Button
@@ -192,6 +237,120 @@ export default function NewRequestPage() {
                 onChange={(event) => setNote(event.target.value)}
                 placeholder="Contoh: untuk radiografi weld joint pipa header unit 3."
               />
+            </div>
+          </div>
+
+          <div className="bg-card border-border flex flex-col gap-3 rounded-xl border p-4">
+            <div className="flex flex-wrap items-start justify-between gap-2">
+              <div>
+                <p className="text-[13.5px] font-semibold">
+                  Personel Penugasan
+                </p>
+                <p className="text-muted-foreground text-[11.5px]">
+                  Diambil dari roster Admin. Urutan pilih jadi urutan di surat
+                  tugas.
+                </p>
+              </div>
+              <span
+                className={cn(
+                  "rounded-full px-2.5 py-1 text-[11px] font-medium tabular-nums",
+                  assigned.length > 0
+                    ? "bg-interactive-surface text-accent-foreground"
+                    : "bg-muted text-muted-foreground",
+                )}
+              >
+                {assigned.length} orang
+              </span>
+            </div>
+
+            {roster.length === 0 ? (
+              <p className="border-border text-muted-foreground rounded-lg border border-dashed px-4 py-4 text-center text-xs">
+                Roster belum diisi Admin. Tambahkan personel manual di bawah,
+                atau minta Admin mengisi menu Personel.
+              </p>
+            ) : (
+              <div className="grid gap-2 sm:grid-cols-2">
+                {roster.map((person) => {
+                  const selected = crew.some(
+                    (entry) => entry.key === person.id,
+                  );
+                  const initials = person.name
+                    .split(" ")
+                    .map((part) => part[0])
+                    .join("")
+                    .slice(0, 2)
+                    .toUpperCase();
+                  return (
+                    <button
+                      key={person.id}
+                      type="button"
+                      aria-pressed={selected}
+                      onClick={() => toggleCrew(person)}
+                      className={cn(
+                        "flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-left transition-colors",
+                        selected
+                          ? "border-interactive-border bg-interactive-surface"
+                          : "border-border hover:bg-muted/60",
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "flex size-8 shrink-0 items-center justify-center rounded-full text-[11px] font-semibold",
+                          selected
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground",
+                        )}
+                      >
+                        {initials}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate text-xs font-medium">
+                          {person.name}
+                        </span>
+                        <span className="text-muted-foreground block truncate text-[10.5px]">
+                          {person.position}
+                        </span>
+                      </span>
+                      <span
+                        className={cn(
+                          "flex size-4 shrink-0 items-center justify-center rounded-full border transition-colors",
+                          selected
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-border",
+                        )}
+                      >
+                        {selected ? <Check className="size-2.5" /> : null}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="border-border flex flex-col gap-2 rounded-lg border border-dashed p-3 sm:flex-row sm:items-center">
+              <Input
+                value={manualName}
+                onChange={(event) => setManualName(event.target.value)}
+                placeholder="Nama di luar roster"
+                aria-label="Nama personel di luar roster"
+                className="h-9 text-xs sm:flex-1"
+              />
+              <Input
+                value={manualPosition}
+                onChange={(event) => setManualPosition(event.target.value)}
+                placeholder="Jabatan"
+                aria-label="Jabatan personel di luar roster"
+                className="h-9 text-xs sm:w-44"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={addManual}
+              >
+                <Plus />
+                Tambah
+              </Button>
             </div>
           </div>
 
@@ -351,8 +510,8 @@ export default function NewRequestPage() {
               ["Site", site || "—"],
               [
                 "Pelanggan",
-                customers.find((customer) => customer.id === customerId)?.name ??
-                  "—",
+                customers.find((customer) => customer.id === customerId)
+                  ?.name ?? "—",
               ],
               ["Jumlah item", `${chosen.length} item`],
               [
@@ -380,6 +539,53 @@ export default function NewRequestPage() {
             </div>
           </div>
 
+          <div className="bg-card border-border flex flex-col gap-1 rounded-xl border p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[13.5px] font-semibold">Tim di Surat Tugas</p>
+              <span className="text-muted-foreground text-[10.5px] tabular-nums">
+                {assigned.length} orang
+              </span>
+            </div>
+            {assigned.length === 0 ? (
+              <p className="text-muted-foreground py-3 text-[11.5px]">
+                Belum ada personel dipilih.
+              </p>
+            ) : (
+              <ol className="flex flex-col">
+                {assigned.map((person, index) => (
+                  <li
+                    key={person.key}
+                    className="border-border flex items-center gap-2.5 border-b py-2 last:border-b-0"
+                  >
+                    <span className="text-muted-foreground w-4 text-[10.5px] tabular-nums">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[11.5px] font-medium">
+                        {person.name}
+                      </p>
+                      <p className="text-muted-foreground truncate text-[10px]">
+                        {person.position}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      aria-label={`Keluarkan ${person.name}`}
+                      onClick={() =>
+                        setCrew((current) =>
+                          current.filter((entry) => entry.key !== person.key),
+                        )
+                      }
+                      className="text-muted-foreground hover:text-foreground rounded p-1 transition-colors"
+                    >
+                      <X className="size-3.5" />
+                    </button>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+
           <div className="bg-card border-border flex flex-col gap-3 rounded-xl border p-4">
             <p className="text-[13.5px] font-semibold">Alur Persetujuan</p>
             {[
@@ -401,11 +607,6 @@ export default function NewRequestPage() {
               </div>
             ))}
           </div>
-
-          <Button onClick={submit} disabled={createRequest.isPending}>
-            <Send />
-            {createRequest.isPending ? "Mengirim…" : "Kirim Permintaan"}
-          </Button>
         </div>
       </div>
     </div>

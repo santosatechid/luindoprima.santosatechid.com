@@ -9,10 +9,7 @@ import {
   InsufficientStockError,
   releaseStock,
 } from "@/services/stockReservation";
-import {
-  formatItems,
-  renderNotification,
-} from "@/services/whatsapp/templates";
+import { formatItems, renderNotification } from "@/services/whatsapp/templates";
 
 const include = {
   leader: { select: { id: true, name: true } },
@@ -59,6 +56,19 @@ export async function POST(request: NextRequest) {
       return bad("Jumlah setiap item harus lebih dari nol.");
     }
 
+    const rawPersonnel: { name?: unknown; position?: unknown }[] =
+      Array.isArray(body.personnel) ? body.personnel : [];
+    const personnel = rawPersonnel.map((row) => ({
+      name: String(row?.name ?? "").trim(),
+      position: String(row?.position ?? "").trim(),
+    }));
+    if (personnel.length === 0) {
+      return bad("Pilih minimal satu personel untuk surat tugas.");
+    }
+    if (personnel.some((row) => !row.name || !row.position)) {
+      return bad("Nama dan jabatan setiap personel wajib diisi.");
+    }
+
     const customer = await prisma.customer.findFirst({
       where: { id: body.customerId, isActive: true },
       select: { id: true, name: true, company: true },
@@ -67,10 +77,7 @@ export async function POST(request: NextRequest) {
 
     const needed = new Map<string, number>();
     for (const row of items) {
-      needed.set(
-        row.itemId,
-        (needed.get(row.itemId) ?? 0) + Number(row.qty),
-      );
+      needed.set(row.itemId, (needed.get(row.itemId) ?? 0) + Number(row.qty));
     }
 
     const stock = await prisma.item.findMany({
@@ -116,6 +123,7 @@ export async function POST(request: NextRequest) {
             ? new Date(body.estimatedDoneAt)
             : null,
           note: body.note || null,
+          personnel,
           leaderId: g.user.id,
           items: {
             create: items.map((row) => ({

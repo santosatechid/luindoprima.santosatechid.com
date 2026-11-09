@@ -30,13 +30,13 @@ model User {
 
   accounts          Account[]
   sessions          Session[]
-  incoming          Incoming[]    @relation("IncomingCreator")
-  requests          Request[]     @relation("RequestLeader")
-  adminRequests     Request[]     @relation("RequestAdmin")
-  directorRequests  Request[]     @relation("RequestDirector")
+  incoming          Incoming[]     @relation("IncomingCreator")
+  requests          Request[]      @relation("RequestLeader")
+  adminRequests     Request[]      @relation("RequestAdmin")
+  directorRequests  Request[]      @relation("RequestDirector")
   deliveryNotes     DeliveryNote[] @relation("DeliveryCreator")
-  turnovers         Turnover[]    @relation("TurnoverSubmitter")
-  verifiedTurnovers Turnover[]    @relation("TurnoverVerifier")
+  turnovers         Turnover[]     @relation("TurnoverSubmitter")
+  verifiedTurnovers Turnover[]     @relation("TurnoverVerifier")
   auditLogs         AuditLog[]
 
   @@map("user")
@@ -115,17 +115,30 @@ model Customer {
   @@map("customer")
 }
 
-model Supplier {
+/// Roster personel yang dipakai Leader saat menyusun surat tugas.
+model Personnel {
   id        String   @id @default(cuid())
+  name      String
+  position  String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([name])
+  @@map("personnel")
+}
+
+model Supplier {
+  id        String    @id @default(cuid())
   name      String
   contact   String?
   phone     String?
   email     String?
   address   String?
-  isActive  Boolean  @default(true)
+  isActive  Boolean   @default(true)
   deletedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 
   items    Item[]
   incoming Incoming[]
@@ -134,14 +147,14 @@ model Supplier {
 }
 
 model ItemCategory {
-  id         String   @id @default(cuid())
-  code       String   @unique
-  name       String   @unique
-  lastNumber Int      @default(0)
-  isActive   Boolean  @default(true)
+  id         String    @id @default(cuid())
+  code       String    @unique
+  name       String    @unique
+  lastNumber Int       @default(0)
+  isActive   Boolean   @default(true)
   deletedAt  DateTime?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   items Item[]
 
@@ -149,29 +162,29 @@ model ItemCategory {
 }
 
 model Item {
-  id               String   @id @default(cuid())
-  code             String   @unique
+  id               String    @id @default(cuid())
+  code             String    @unique
   name             String
   categoryId       String
   brand            String?
   size             String?
   unit             String
-  stockGudang      Int      @default(0)
-  stockOperasional Int      @default(0)
-  onRequest        Int      @default(0)
-  minStock         Int      @default(0)
+  stockGudang      Int       @default(0)
+  stockOperasional Int       @default(0)
+  onRequest        Int       @default(0)
+  minStock         Int       @default(0)
   supplierId       String?
-  isActive         Boolean  @default(true)
+  isActive         Boolean   @default(true)
   deletedAt        DateTime?
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
-  category       ItemCategory      @relation(fields: [categoryId], references: [id])
-  supplier       Supplier?         @relation(fields: [supplierId], references: [id], onDelete: SetNull)
-  incomingItems  IncomingItem[]
-  requestItems   RequestItem[]
-  deliveryItems  DeliveryNoteItem[]
-  turnoverItems  TurnoverItem[]
+  category      ItemCategory       @relation(fields: [categoryId], references: [id])
+  supplier      Supplier?          @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  incomingItems IncomingItem[]
+  requestItems  RequestItem[]
+  deliveryItems DeliveryNoteItem[]
+  turnoverItems TurnoverItem[]
 
   @@index([supplierId])
   @@index([categoryId])
@@ -179,14 +192,14 @@ model Item {
 }
 
 model Incoming {
-  id           String   @id @default(cuid())
-  number       String   @unique
-  receivedAt   DateTime @default(now())
-  supplierId   String
-  documentNo   String?
-  note         String?
-  createdById  String
-  createdAt    DateTime @default(now())
+  id          String   @id @default(cuid())
+  number      String   @unique
+  receivedAt  DateTime @default(now())
+  supplierId  String
+  documentNo  String?
+  note        String?
+  createdById String
+  createdAt   DateTime @default(now())
 
   supplier  Supplier       @relation(fields: [supplierId], references: [id])
   createdBy User           @relation("IncomingCreator", fields: [createdById], references: [id])
@@ -212,30 +225,32 @@ model IncomingItem {
 }
 
 model Request {
-  id              String   @id @default(cuid())
-  number          String   @unique
+  id              String    @id @default(cuid())
+  number          String    @unique
   poNo            String
   site            String
   customerId      String?
   neededAt        DateTime
   estimatedDoneAt DateTime?
   note            String?
-  status          String   @default("PENDING_ADMIN")
+  /// Snapshot personel surat tugas: [{ name, position }]
+  personnel       Json?
+  status          String    @default("PENDING_ADMIN")
   leaderId        String
   adminId         String?
   directorId      String?
   adminNote       String?
   directorNote    String?
   decidedAt       DateTime?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  leader     User          @relation("RequestLeader", fields: [leaderId], references: [id])
-  admin      User?         @relation("RequestAdmin", fields: [adminId], references: [id])
-  director   User?         @relation("RequestDirector", fields: [directorId], references: [id])
-  customer   Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
-  items      RequestItem[]
-  delivery   DeliveryNote?
+  leader   User          @relation("RequestLeader", fields: [leaderId], references: [id])
+  admin    User?         @relation("RequestAdmin", fields: [adminId], references: [id])
+  director User?         @relation("RequestDirector", fields: [directorId], references: [id])
+  customer Customer?     @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  items    RequestItem[]
+  delivery DeliveryNote?
 
   @@index([customerId])
   @@index([leaderId])
@@ -279,7 +294,7 @@ model DeliveryNote {
 }
 
 model DeliveryNoteItem {
-  id             String @id @default(cuid())
+  id             String  @id @default(cuid())
   deliveryNoteId String
   itemId         String
   qty            Int

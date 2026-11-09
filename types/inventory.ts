@@ -1,11 +1,7 @@
 export type Role = "ADMIN" | "DIREKTUR" | "LEADER";
 
 export type RequestStatus =
-  | "PENDING_ADMIN"
-  | "PENDING_DIRECTOR"
-  | "APPROVED"
-  | "REJECTED"
-  | "COMPLETED";
+  "PENDING_ADMIN" | "PENDING_DIRECTOR" | "APPROVED" | "REJECTED" | "COMPLETED";
 
 export type DeliveryStatus = "ISSUED" | "CONFIRMED" | "COMPLETED";
 export type TurnoverStatus = "DRAFT" | "SUBMITTED" | "VERIFIED";
@@ -58,6 +54,18 @@ export type CustomerRef = {
   company: string | null;
 };
 
+/// Roster personel yang dikelola Admin, dipakai Leader di surat tugas.
+export type Personnel = {
+  id: string;
+  name: string;
+  position: string;
+  isActive: boolean;
+  createdAt: string;
+};
+
+/// Salinan personel yang dibekukan di request saat surat tugas dibuat.
+export type RequestPersonnel = { name: string; position: string };
+
 export type Supplier = {
   id: string;
   name: string;
@@ -69,7 +77,12 @@ export type Supplier = {
   _count?: { items: number };
 };
 
-export type IncomingItem = { id: string; itemId: string; qty: number; item: Item };
+export type IncomingItem = {
+  id: string;
+  itemId: string;
+  qty: number;
+  item: Item;
+};
 
 export type Incoming = {
   id: string;
@@ -83,7 +96,12 @@ export type Incoming = {
   items: IncomingItem[];
 };
 
-export type RequestItem = { id: string; itemId: string; qty: number; item: Item };
+export type RequestItem = {
+  id: string;
+  itemId: string;
+  qty: number;
+  item: Item;
+};
 
 export type InventoryRequest = {
   id: string;
@@ -94,6 +112,7 @@ export type InventoryRequest = {
   neededAt: string;
   estimatedDoneAt: string | null;
   note: string | null;
+  personnel: RequestPersonnel[] | null;
   status: RequestStatus;
   adminNote: string | null;
   directorNote: string | null;

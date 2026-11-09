@@ -56,6 +56,7 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   Customer: 'Customer',
+  Personnel: 'Personnel',
   Supplier: 'Supplier',
   ItemCategory: 'ItemCategory',
   Item: 'Item',
@@ -171,6 +172,18 @@ export const CustomerScalarFieldEnum = {
 export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typeof CustomerScalarFieldEnum]
 
 
+export const PersonnelScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  position: 'position',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PersonnelScalarFieldEnum = (typeof PersonnelScalarFieldEnum)[keyof typeof PersonnelScalarFieldEnum]
+
+
 export const SupplierScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -256,6 +269,7 @@ export const RequestScalarFieldEnum = {
   neededAt: 'neededAt',
   estimatedDoneAt: 'estimatedDoneAt',
   note: 'note',
+  personnel: 'personnel',
   status: 'status',
   leaderId: 'leaderId',
   adminId: 'adminId',
@@ -375,6 +389,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -389,4 +411,13 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 

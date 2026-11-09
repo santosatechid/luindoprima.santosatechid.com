@@ -43,6 +43,11 @@ export type Verification = Prisma.VerificationModel
  */
 export type Customer = Prisma.CustomerModel
 /**
+ * Model Personnel
+ * Roster personel yang dipakai Leader saat menyusun surat tugas.
+ */
+export type Personnel = Prisma.PersonnelModel
+/**
  * Model Supplier
  * 
  */

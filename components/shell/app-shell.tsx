@@ -9,6 +9,7 @@ import {
   ClipboardList,
   FileSpreadsheet,
   Inbox,
+  IdCard,
   LayoutDashboard,
   LogOut,
   MessageSquare,
@@ -105,6 +106,12 @@ const NAV: NavGroup[] = [
         roles: ["ADMIN", "DIREKTUR", "LEADER"],
       },
       {
+        title: "Personel",
+        url: "/personnel",
+        icon: IdCard,
+        roles: ["ADMIN"],
+      },
+      {
         title: "Master Item & Supplier",
         url: "/items",
         icon: Package,
@@ -148,6 +155,7 @@ const TITLES: Record<string, string> = {
   "/turnover": "Turnover",
   "/inspections": "Progres Inspeksi",
   "/customers": "Pelanggan",
+  "/personnel": "Personel",
   "/items": "Master Item & Supplier",
   "/stock": "Stok Inventory",
   "/reports": "Laporan",

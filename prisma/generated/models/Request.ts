@@ -73,6 +73,7 @@ export type RequestCountAggregateOutputType = {
   neededAt: number
   estimatedDoneAt: number
   note: number
+  personnel: number
   status: number
   leaderId: number
   adminId: number
@@ -135,6 +136,7 @@ export type RequestCountAggregateInputType = {
   neededAt?: true
   estimatedDoneAt?: true
   note?: true
+  personnel?: true
   status?: true
   leaderId?: true
   adminId?: true
@@ -228,6 +230,7 @@ export type RequestGroupByOutputType = {
   neededAt: Date
   estimatedDoneAt: Date | null
   note: string | null
+  personnel: runtime.JsonValue | null
   status: string
   leaderId: string
   adminId: string | null
@@ -269,6 +272,7 @@ export type RequestWhereInput = {
   neededAt?: Prisma.DateTimeFilter<"Request"> | Date | string
   estimatedDoneAt?: Prisma.DateTimeNullableFilter<"Request"> | Date | string | null
   note?: Prisma.StringNullableFilter<"Request"> | string | null
+  personnel?: Prisma.JsonNullableFilter<"Request">
   status?: Prisma.StringFilter<"Request"> | string
   leaderId?: Prisma.StringFilter<"Request"> | string
   adminId?: Prisma.StringNullableFilter<"Request"> | string | null
@@ -295,6 +299,7 @@ export type RequestOrderByWithRelationInput = {
   neededAt?: Prisma.SortOrder
   estimatedDoneAt?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
+  personnel?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   adminId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -324,6 +329,7 @@ export type RequestWhereUniqueInput = Prisma.AtLeast<{
   neededAt?: Prisma.DateTimeFilter<"Request"> | Date | string
   estimatedDoneAt?: Prisma.DateTimeNullableFilter<"Request"> | Date | string | null
   note?: Prisma.StringNullableFilter<"Request"> | string | null
+  personnel?: Prisma.JsonNullableFilter<"Request">
   status?: Prisma.StringFilter<"Request"> | string
   leaderId?: Prisma.StringFilter<"Request"> | string
   adminId?: Prisma.StringNullableFilter<"Request"> | string | null
@@ -350,6 +356,7 @@ export type RequestOrderByWithAggregationInput = {
   neededAt?: Prisma.SortOrder
   estimatedDoneAt?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
+  personnel?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   adminId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -376,6 +383,7 @@ export type RequestScalarWhereWithAggregatesInput = {
   neededAt?: Prisma.DateTimeWithAggregatesFilter<"Request"> | Date | string
   estimatedDoneAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Request"> | Date | string | null
   note?: Prisma.StringNullableWithAggregatesFilter<"Request"> | string | null
+  personnel?: Prisma.JsonNullableWithAggregatesFilter<"Request">
   status?: Prisma.StringWithAggregatesFilter<"Request"> | string
   leaderId?: Prisma.StringWithAggregatesFilter<"Request"> | string
   adminId?: Prisma.StringNullableWithAggregatesFilter<"Request"> | string | null
@@ -395,6 +403,7 @@ export type RequestCreateInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   adminNote?: string | null
   directorNote?: string | null
@@ -418,6 +427,7 @@ export type RequestUncheckedCreateInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   leaderId: string
   adminId?: string | null
@@ -439,6 +449,7 @@ export type RequestUpdateInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -462,6 +473,7 @@ export type RequestUncheckedUpdateInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -484,6 +496,7 @@ export type RequestCreateManyInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   leaderId: string
   adminId?: string | null
@@ -503,6 +516,7 @@ export type RequestUpdateManyMutationInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -520,6 +534,7 @@ export type RequestUncheckedUpdateManyInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -550,6 +565,7 @@ export type RequestCountOrderByAggregateInput = {
   neededAt?: Prisma.SortOrder
   estimatedDoneAt?: Prisma.SortOrder
   note?: Prisma.SortOrder
+  personnel?: Prisma.SortOrder
   status?: Prisma.SortOrder
   leaderId?: Prisma.SortOrder
   adminId?: Prisma.SortOrder
@@ -810,6 +826,7 @@ export type RequestCreateWithoutLeaderInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   adminNote?: string | null
   directorNote?: string | null
@@ -832,6 +849,7 @@ export type RequestUncheckedCreateWithoutLeaderInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   adminId?: string | null
   directorId?: string | null
@@ -862,6 +880,7 @@ export type RequestCreateWithoutAdminInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   adminNote?: string | null
   directorNote?: string | null
@@ -884,6 +903,7 @@ export type RequestUncheckedCreateWithoutAdminInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   leaderId: string
   directorId?: string | null
@@ -914,6 +934,7 @@ export type RequestCreateWithoutDirectorInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   adminNote?: string | null
   directorNote?: string | null
@@ -936,6 +957,7 @@ export type RequestUncheckedCreateWithoutDirectorInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   leaderId: string
   adminId?: string | null
@@ -986,6 +1008,7 @@ export type RequestScalarWhereInput = {
   neededAt?: Prisma.DateTimeFilter<"Request"> | Date | string
   estimatedDoneAt?: Prisma.DateTimeNullableFilter<"Request"> | Date | string | null
   note?: Prisma.StringNullableFilter<"Request"> | string | null
+  personnel?: Prisma.JsonNullableFilter<"Request">
   status?: Prisma.StringFilter<"Request"> | string
   leaderId?: Prisma.StringFilter<"Request"> | string
   adminId?: Prisma.StringNullableFilter<"Request"> | string | null
@@ -1037,6 +1060,7 @@ export type RequestCreateWithoutCustomerInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   adminNote?: string | null
   directorNote?: string | null
@@ -1058,6 +1082,7 @@ export type RequestUncheckedCreateWithoutCustomerInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   leaderId: string
   adminId?: string | null
@@ -1105,6 +1130,7 @@ export type RequestCreateWithoutItemsInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   adminNote?: string | null
   directorNote?: string | null
@@ -1127,6 +1153,7 @@ export type RequestUncheckedCreateWithoutItemsInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   leaderId: string
   adminId?: string | null
@@ -1163,6 +1190,7 @@ export type RequestUpdateWithoutItemsInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1185,6 +1213,7 @@ export type RequestUncheckedUpdateWithoutItemsInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1205,6 +1234,7 @@ export type RequestCreateWithoutDeliveryInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   adminNote?: string | null
   directorNote?: string | null
@@ -1227,6 +1257,7 @@ export type RequestUncheckedCreateWithoutDeliveryInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   leaderId: string
   adminId?: string | null
@@ -1263,6 +1294,7 @@ export type RequestUpdateWithoutDeliveryInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1285,6 +1317,7 @@ export type RequestUncheckedUpdateWithoutDeliveryInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1306,6 +1339,7 @@ export type RequestCreateManyLeaderInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   adminId?: string | null
   directorId?: string | null
@@ -1325,6 +1359,7 @@ export type RequestCreateManyAdminInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   leaderId: string
   directorId?: string | null
@@ -1344,6 +1379,7 @@ export type RequestCreateManyDirectorInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   leaderId: string
   adminId?: string | null
@@ -1362,6 +1398,7 @@ export type RequestUpdateWithoutLeaderInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1384,6 +1421,7 @@ export type RequestUncheckedUpdateWithoutLeaderInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   directorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1405,6 +1443,7 @@ export type RequestUncheckedUpdateManyWithoutLeaderInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   directorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1423,6 +1462,7 @@ export type RequestUpdateWithoutAdminInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1445,6 +1485,7 @@ export type RequestUncheckedUpdateWithoutAdminInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   directorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1466,6 +1507,7 @@ export type RequestUncheckedUpdateManyWithoutAdminInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   directorId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1484,6 +1526,7 @@ export type RequestUpdateWithoutDirectorInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1506,6 +1549,7 @@ export type RequestUncheckedUpdateWithoutDirectorInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1527,6 +1571,7 @@ export type RequestUncheckedUpdateManyWithoutDirectorInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1545,6 +1590,7 @@ export type RequestCreateManyCustomerInput = {
   neededAt: Date | string
   estimatedDoneAt?: Date | string | null
   note?: string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: string
   leaderId: string
   adminId?: string | null
@@ -1564,6 +1610,7 @@ export type RequestUpdateWithoutCustomerInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   adminNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   directorNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1585,6 +1632,7 @@ export type RequestUncheckedUpdateWithoutCustomerInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1606,6 +1654,7 @@ export type RequestUncheckedUpdateManyWithoutCustomerInput = {
   neededAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   estimatedDoneAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  personnel?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   status?: Prisma.StringFieldUpdateOperationsInput | string
   leaderId?: Prisma.StringFieldUpdateOperationsInput | string
   adminId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1657,6 +1706,7 @@ export type RequestSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   neededAt?: boolean
   estimatedDoneAt?: boolean
   note?: boolean
+  personnel?: boolean
   status?: boolean
   leaderId?: boolean
   adminId?: boolean
@@ -1684,6 +1734,7 @@ export type RequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   neededAt?: boolean
   estimatedDoneAt?: boolean
   note?: boolean
+  personnel?: boolean
   status?: boolean
   leaderId?: boolean
   adminId?: boolean
@@ -1708,6 +1759,7 @@ export type RequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   neededAt?: boolean
   estimatedDoneAt?: boolean
   note?: boolean
+  personnel?: boolean
   status?: boolean
   leaderId?: boolean
   adminId?: boolean
@@ -1732,6 +1784,7 @@ export type RequestSelectScalar = {
   neededAt?: boolean
   estimatedDoneAt?: boolean
   note?: boolean
+  personnel?: boolean
   status?: boolean
   leaderId?: boolean
   adminId?: boolean
@@ -1743,7 +1796,7 @@ export type RequestSelectScalar = {
   updatedAt?: boolean
 }
 
-export type RequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "poNo" | "site" | "customerId" | "neededAt" | "estimatedDoneAt" | "note" | "status" | "leaderId" | "adminId" | "directorId" | "adminNote" | "directorNote" | "decidedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["request"]>
+export type RequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "poNo" | "site" | "customerId" | "neededAt" | "estimatedDoneAt" | "note" | "personnel" | "status" | "leaderId" | "adminId" | "directorId" | "adminNote" | "directorNote" | "decidedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["request"]>
 export type RequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   leader?: boolean | Prisma.UserDefaultArgs<ExtArgs>
   admin?: boolean | Prisma.Request$adminArgs<ExtArgs>
@@ -1785,6 +1838,10 @@ export type $RequestPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     neededAt: Date
     estimatedDoneAt: Date | null
     note: string | null
+    /**
+     * Snapshot personel surat tugas: [{ name, position }]
+     */
+    personnel: runtime.JsonValue | null
     status: string
     leaderId: string
     adminId: string | null
@@ -2231,6 +2288,7 @@ export interface RequestFieldRefs {
   readonly neededAt: Prisma.FieldRef<"Request", 'DateTime'>
   readonly estimatedDoneAt: Prisma.FieldRef<"Request", 'DateTime'>
   readonly note: Prisma.FieldRef<"Request", 'String'>
+  readonly personnel: Prisma.FieldRef<"Request", 'Json'>
   readonly status: Prisma.FieldRef<"Request", 'String'>
   readonly leaderId: Prisma.FieldRef<"Request", 'String'>
   readonly adminId: Prisma.FieldRef<"Request", 'String'>

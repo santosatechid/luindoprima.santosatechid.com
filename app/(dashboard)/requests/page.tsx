@@ -1,6 +1,6 @@
 "use client";
 
-import { History, Plus, Search } from "lucide-react";
+import { FileText, History, Plus, Search } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -269,7 +269,14 @@ export default function RequestsPage() {
                   <TableCell>
                     <p className="text-xs font-medium">{row.poNo}</p>
                     <p className="text-muted-foreground text-[10.5px]">
-                      {row.site} · {row.customer?.company ?? row.customer?.name ?? "Tanpa pelanggan"} · {row.leader.name}
+                      {row.site} ·{" "}
+                      {row.customer?.company ??
+                        row.customer?.name ??
+                        "Tanpa pelanggan"}{" "}
+                      · {row.leader.name}
+                      {row.personnel?.length
+                        ? ` · ${row.personnel.length} personel`
+                        : ""}
                     </p>
                   </TableCell>
                   <TableCell className="text-muted-foreground text-xs">
@@ -390,6 +397,41 @@ export default function RequestsPage() {
                 </Table>
               </div>
 
+              {selected.personnel && selected.personnel.length > 0 ? (
+                <div className="overflow-hidden rounded-lg border">
+                  <div className="bg-muted/60 flex items-center justify-between px-3 py-2">
+                    <p className="text-[11.5px] font-medium">
+                      Personel di surat tugas
+                    </p>
+                    <span className="text-muted-foreground text-[10.5px] tabular-nums">
+                      {selected.personnel.length} orang
+                    </span>
+                  </div>
+                  <ol className="divide-border divide-y">
+                    {selected.personnel.map((person, index) => (
+                      <li
+                        key={`${person.name}-${index}`}
+                        className="flex items-baseline gap-2.5 px-3 py-2"
+                      >
+                        <span className="text-muted-foreground w-4 text-[10.5px] tabular-nums">
+                          {String(index + 1).padStart(2, "0")}
+                        </span>
+                        <span className="text-xs font-medium">
+                          {person.name}
+                        </span>
+                        <span className="text-muted-foreground ml-auto text-right text-[10.5px]">
+                          {person.position}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              ) : (
+                <p className="text-muted-foreground rounded-lg border border-dashed px-3 py-2.5 text-[11px]">
+                  Personel belum diisi, surat tugas belum bisa dicetak.
+                </p>
+              )}
+
               {selected.note ? (
                 <p className="text-muted-foreground text-[11.5px]">
                   Catatan Leader: {selected.note}
@@ -403,6 +445,15 @@ export default function RequestsPage() {
                   ? ` · Direktur: ${selected.director.name}`
                   : ""}
               </div>
+
+              {selected.personnel && selected.personnel.length > 0 ? (
+                <Button asChild variant="outline" size="sm" className="w-full">
+                  <a href={`/api/requests/${selected.id}/task-letter`}>
+                    <FileText />
+                    Unduh Surat Tugas (PDF)
+                  </a>
+                </Button>
+              ) : null}
 
               {canDecide ? (
                 <div className="flex flex-col gap-2">

@@ -13,6 +13,7 @@ export type RequestInput = {
   neededAt: string;
   estimatedDoneAt?: string;
   note?: string;
+  personnel: { name: string; position: string }[];
   items: { itemId: string; qty: number }[];
 };
 

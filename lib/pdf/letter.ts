@@ -20,11 +20,16 @@ const MUTED = rgb(0.38, 0.43, 0.4);
 const BRAND = rgb(0.113, 0.612, 0.184);
 const BRAND_TINT = rgb(0.918, 0.973, 0.925);
 const HAIRLINE = rgb(0.86, 0.9, 0.87);
+const NAVY = rgb(0.043, 0.169, 0.078);
+const NAVY_MUTED = rgb(0.616, 0.749, 0.651);
+const PAPER = rgb(1, 1, 1);
 
 export type Column = {
   label: string;
   width: number;
   align?: "left" | "right" | "center";
+  /// Kolom checklist: nilai sel non-kosong digambar sebagai kotak tercentang.
+  check?: boolean;
 };
 
 export type Cell = string;
@@ -162,6 +167,70 @@ export async function createLetter() {
     y -= 8;
   }
 
+  /**
+   * Pita judul dokumen: satu blok navy dengan nomor surat di sisi kanan.
+   * Dipakai surat tugas; surat lain tetap memakai title().
+   */
+  function band(options: {
+    title: string;
+    subtitle?: string;
+    label: string;
+    value: string;
+  }) {
+    const height = 58;
+    const top = y;
+    page.drawRectangle({
+      x: MARGIN,
+      y: top - height,
+      width: CONTENT_WIDTH,
+      height,
+      color: NAVY,
+    });
+    page.drawRectangle({
+      x: MARGIN,
+      y: top - height,
+      width: CONTENT_WIDTH,
+      height: 2,
+      color: BRAND,
+    });
+
+    page.drawText(options.title, {
+      x: MARGIN + 16,
+      y: top - 26,
+      size: 15,
+      font: bold,
+      color: PAPER,
+    });
+    if (options.subtitle) {
+      page.drawText(options.subtitle, {
+        x: MARGIN + 16,
+        y: top - 42,
+        size: 8.5,
+        font: regular,
+        color: NAVY_MUTED,
+      });
+    }
+
+    const right = A4.width - MARGIN - 16;
+    const label = options.label.toUpperCase();
+    page.drawText(label, {
+      x: right - bold.widthOfTextAtSize(label, 7),
+      y: top - 21,
+      size: 7,
+      font: bold,
+      color: NAVY_MUTED,
+    });
+    page.drawText(options.value, {
+      x: right - bold.widthOfTextAtSize(options.value, 9.5),
+      y: top - 37,
+      size: 9.5,
+      font: bold,
+      color: PAPER,
+    });
+
+    y = top - height - 22;
+  }
+
   function meta(rows: [string, string][]) {
     const gap = 12;
     const columnWidth = (CONTENT_WIDTH - gap) / 2;
@@ -249,12 +318,7 @@ export async function createLetter() {
     for (const row of rows) {
       const cells = row.map((cell, index) => {
         const column = columns[index];
-        return wrap(
-          cell,
-          regular,
-          fontSize,
-          column.width - padding * 2,
-        );
+        return wrap(cell, regular, fontSize, column.width - padding * 2);
       });
       const lines = Math.max(1, ...cells.map((cell) => cell.length));
       const height = lines * lineHeight + padding * 2;
@@ -263,6 +327,36 @@ export async function createLetter() {
       let x = MARGIN;
       cells.forEach((cellLines, index) => {
         const column = columns[index];
+        if (column.check) {
+          const box = 9;
+          const boxX = x + (column.width - box) / 2;
+          const boxY = y - height / 2 - box / 2;
+          page.drawRectangle({
+            x: boxX,
+            y: boxY,
+            width: box,
+            height: box,
+            borderColor: BRAND,
+            borderWidth: 0.9,
+            color: PAPER,
+          });
+          if (cellLines.join("").trim()) {
+            page.drawLine({
+              start: { x: boxX + 2.1, y: boxY + 4.6 },
+              end: { x: boxX + 3.7, y: boxY + 3 },
+              thickness: 1.2,
+              color: BRAND,
+            });
+            page.drawLine({
+              start: { x: boxX + 3.7, y: boxY + 3 },
+              end: { x: boxX + 7.1, y: boxY + 6.9 },
+              thickness: 1.2,
+              color: BRAND,
+            });
+          }
+          x += column.width;
+          return;
+        }
         cellLines.forEach((line, lineIndex) => {
           const width = regular.widthOfTextAtSize(line, fontSize);
           const offset =
@@ -376,10 +470,13 @@ export async function createLetter() {
         color: HAIRLINE,
       });
       current.drawText(
-        `Dibuat otomatis oleh NDT Inventory · ${new Intl.DateTimeFormat("id-ID", {
-          dateStyle: "medium",
-          timeStyle: "short",
-        }).format(date)}`,
+        `Dibuat otomatis oleh NDT Inventory · ${new Intl.DateTimeFormat(
+          "id-ID",
+          {
+            dateStyle: "medium",
+            timeStyle: "short",
+          },
+        ).format(date)}`,
         { x: MARGIN, y: 34, size: 7, font: regular, color: MUTED },
       );
       const label = `Halaman ${index + 1} dari ${pageCount}`;
@@ -407,6 +504,7 @@ export async function createLetter() {
     },
     header,
     title,
+    band,
     meta,
     sectionLabel,
     table,

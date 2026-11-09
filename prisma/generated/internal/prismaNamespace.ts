@@ -402,6 +402,7 @@ export const ModelName = {
   Account: 'Account',
   Verification: 'Verification',
   Customer: 'Customer',
+  Personnel: 'Personnel',
   Supplier: 'Supplier',
   ItemCategory: 'ItemCategory',
   Item: 'Item',
@@ -430,7 +431,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "customer" | "supplier" | "itemCategory" | "item" | "incoming" | "incomingItem" | "request" | "requestItem" | "deliveryNote" | "deliveryNoteItem" | "turnover" | "turnoverItem" | "notification" | "auditLog"
+    modelProps: "user" | "session" | "account" | "verification" | "customer" | "personnel" | "supplier" | "itemCategory" | "item" | "incoming" | "incomingItem" | "request" | "requestItem" | "deliveryNote" | "deliveryNoteItem" | "turnover" | "turnoverItem" | "notification" | "auditLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -801,6 +802,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CustomerCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CustomerCountAggregateOutputType> | number
+        }
+      }
+    }
+    Personnel: {
+      payload: Prisma.$PersonnelPayload<ExtArgs>
+      fields: Prisma.PersonnelFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PersonnelFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonnelPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PersonnelFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonnelPayload>
+        }
+        findFirst: {
+          args: Prisma.PersonnelFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonnelPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PersonnelFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonnelPayload>
+        }
+        findMany: {
+          args: Prisma.PersonnelFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonnelPayload>[]
+        }
+        create: {
+          args: Prisma.PersonnelCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonnelPayload>
+        }
+        createMany: {
+          args: Prisma.PersonnelCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PersonnelCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonnelPayload>[]
+        }
+        delete: {
+          args: Prisma.PersonnelDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonnelPayload>
+        }
+        update: {
+          args: Prisma.PersonnelUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonnelPayload>
+        }
+        deleteMany: {
+          args: Prisma.PersonnelDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PersonnelUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PersonnelUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonnelPayload>[]
+        }
+        upsert: {
+          args: Prisma.PersonnelUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PersonnelPayload>
+        }
+        aggregate: {
+          args: Prisma.PersonnelAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePersonnel>
+        }
+        groupBy: {
+          args: Prisma.PersonnelGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PersonnelGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PersonnelCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PersonnelCountAggregateOutputType> | number
         }
       }
     }
@@ -1889,6 +1964,18 @@ export const CustomerScalarFieldEnum = {
 export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typeof CustomerScalarFieldEnum]
 
 
+export const PersonnelScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  position: 'position',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PersonnelScalarFieldEnum = (typeof PersonnelScalarFieldEnum)[keyof typeof PersonnelScalarFieldEnum]
+
+
 export const SupplierScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -1974,6 +2061,7 @@ export const RequestScalarFieldEnum = {
   neededAt: 'neededAt',
   estimatedDoneAt: 'estimatedDoneAt',
   note: 'note',
+  personnel: 'personnel',
   status: 'status',
   leaderId: 'leaderId',
   adminId: 'adminId',
@@ -2093,6 +2181,14 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
 export const QueryMode = {
   default: 'default',
   insensitive: 'insensitive'
@@ -2107,6 +2203,15 @@ export const NullsOrder = {
 } as const
 
 export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
+
+
+export const JsonNullValueFilter = {
+  DbNull: DbNull,
+  JsonNull: JsonNull,
+  AnyNull: AnyNull
+} as const
+
+export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
 
 
 
@@ -2161,6 +2266,20 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -2333,6 +2452,7 @@ export type GlobalOmitConfig = {
   account?: Prisma.AccountOmit
   verification?: Prisma.VerificationOmit
   customer?: Prisma.CustomerOmit
+  personnel?: Prisma.PersonnelOmit
   supplier?: Prisma.SupplierOmit
   itemCategory?: Prisma.ItemCategoryOmit
   item?: Prisma.ItemOmit
