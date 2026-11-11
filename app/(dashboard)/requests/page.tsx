@@ -66,32 +66,37 @@ export default function RequestsPage() {
 
   const customers = uniqueValues(rows.map((row) => row.customer?.name));
 
-  const filtered = rows.filter((row) => {
-    const matchesTab =
-      tab === "ALL" ||
-      (tab === "PENDING" &&
-        ["PENDING_ADMIN", "PENDING_DIRECTOR"].includes(row.status)) ||
-      (tab === "APPROVED" && row.status === "APPROVED") ||
-      (tab === "COMPLETED" && row.status === "COMPLETED");
-    const matchesStatus = status === "ALL" || row.status === status;
-    const matchesCustomer =
-      customer === "ALL" || row.customer?.name === customer;
-    const query = search.toLowerCase();
-    const matchesSearch =
-      row.number.toLowerCase().includes(query) ||
-      row.poNo.toLowerCase().includes(query) ||
-      row.site.toLowerCase().includes(query) ||
-      (row.customer?.name ?? "").toLowerCase().includes(query) ||
-      (row.customer?.company ?? "").toLowerCase().includes(query) ||
-      row.leader.name.toLowerCase().includes(query);
-    return (
-      matchesTab &&
-      matchesStatus &&
-      matchesCustomer &&
-      matchesSearch &&
-      inRange(row.createdAt, dateFrom, dateTo)
+  const filtered = rows
+    .filter((row) => {
+      const matchesTab =
+        tab === "ALL" ||
+        (tab === "PENDING" &&
+          ["PENDING_ADMIN", "PENDING_DIRECTOR"].includes(row.status)) ||
+        (tab === "APPROVED" && row.status === "APPROVED") ||
+        (tab === "COMPLETED" && row.status === "COMPLETED");
+      const matchesStatus = status === "ALL" || row.status === status;
+      const matchesCustomer =
+        customer === "ALL" || row.customer?.name === customer;
+      const query = search.toLowerCase();
+      const matchesSearch =
+        row.number.toLowerCase().includes(query) ||
+        row.poNo.toLowerCase().includes(query) ||
+        row.site.toLowerCase().includes(query) ||
+        (row.customer?.name ?? "").toLowerCase().includes(query) ||
+        (row.customer?.company ?? "").toLowerCase().includes(query) ||
+        row.leader.name.toLowerCase().includes(query);
+      return (
+        matchesTab &&
+        matchesStatus &&
+        matchesCustomer &&
+        matchesSearch &&
+        inRange(row.createdAt, dateFrom, dateTo)
+      );
+    })
+    .sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
-  });
 
   const canDecide =
     selected &&

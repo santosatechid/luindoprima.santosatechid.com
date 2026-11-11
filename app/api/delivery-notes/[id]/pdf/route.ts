@@ -20,6 +20,7 @@ export async function GET(
           poNo: true,
           site: true,
           leaderId: true,
+          personnel: true,
           customer: {
             select: { name: true, company: true, address: true },
           },

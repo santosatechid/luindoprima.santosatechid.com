@@ -125,6 +125,21 @@ export default function CustomerDetailPage() {
     [customer],
   );
 
+  const personnel = useMemo(
+    () =>
+      Array.from(
+        new Map(
+          (customer?.requests ?? []).flatMap((request) =>
+            (request.personnel ?? []).map((person) => [
+              `${person.name}\u0000${person.position}`,
+              person,
+            ] as const),
+          ),
+        ).values(),
+      ),
+    [customer],
+  );
+
   if (isLoading) return <PageSkeleton stats={4} columns={6} />;
 
   if (!customer) {
@@ -504,6 +519,31 @@ export default function CustomerDetailPage() {
                     key={leader}
                     status="SAFE"
                     label={leader}
+                    className="border-border bg-card text-foreground"
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-card border-border flex flex-col gap-2 rounded-xl border p-4">
+            <div className="flex items-baseline justify-between gap-2">
+              <p className="text-[13.5px] font-semibold">
+                Personel yang Bergerak
+              </p>
+              <span className="text-muted-foreground text-[10.5px] tabular-nums">
+                {personnel.length} orang
+              </span>
+            </div>
+            {personnel.length === 0 ? (
+              <p className="text-muted-foreground text-[11px]">Belum ada.</p>
+            ) : (
+              <div className="flex flex-wrap gap-1.5">
+                {personnel.map((person) => (
+                  <StatusBadge
+                    key={`${person.name}-${person.position}`}
+                    status="SAFE"
+                    label={`${person.name} · ${person.position}`}
                     className="border-border bg-card text-foreground"
                   />
                 ))}

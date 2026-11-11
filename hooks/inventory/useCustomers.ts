@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { CACHE_STRATEGIES } from "@/app/providers";
 import { apiDelete, apiGet, apiPost, apiPut } from "@/lib/http/apiClient";
-import type { Customer } from "@/types/inventory";
+import type { Customer, RequestPersonnel } from "@/types/inventory";
 
 export type CustomerInput = {
   id?: string;
@@ -27,6 +27,7 @@ export type CustomerDetail = Customer & {
     status: string;
     createdAt: string;
     neededAt: string;
+    personnel: RequestPersonnel[] | null;
     leader: { id: string; name: string };
     items: {
       id: string;

@@ -1,4 +1,5 @@
 import { createLetter, pdfDate } from "@/lib/pdf/letter";
+import type { RequestPersonnel } from "@/types/inventory";
 
 type DeliveryNoteDocument = {
   number: string;
@@ -10,6 +11,7 @@ type DeliveryNoteDocument = {
     number: string;
     poNo: string;
     site: string;
+    personnel: unknown;
     customer: { name: string; company: string | null; address: string | null } | null;
     leader: { name: string };
   };
@@ -37,6 +39,7 @@ type DamageDocument = {
       number: string;
       poNo: string;
       site: string;
+      personnel: unknown;
       customer: { name: string; company: string | null } | null;
       leader: { name: string };
     };
@@ -59,6 +62,9 @@ const STATUS_LABEL: Record<string, string> = {
 export async function buildDeliveryNotePdf(note: DeliveryNoteDocument) {
   const doc = await createLetter();
   const customer = note.request.customer;
+  const crew = Array.isArray(note.request.personnel)
+    ? (note.request.personnel as RequestPersonnel[])
+    : [];
 
   doc.title("SURAT JALAN", note.number);
   doc.stamp("Status dokumen", STATUS_LABEL[note.status] ?? note.status);
@@ -76,6 +82,18 @@ export async function buildDeliveryNotePdf(note: DeliveryNoteDocument) {
   if (customer?.address) {
     doc.sectionLabel("ALAMAT PELANGGAN");
     doc.paragraph(customer.address);
+  }
+
+  if (crew.length > 0) {
+    doc.sectionLabel("PERSONEL YANG DITUGASKAN");
+    doc.table(
+      [
+        { label: "No", width: 34, align: "center" },
+        { label: "Nama", width: 287 },
+        { label: "Jabatan", width: 190.28 },
+      ],
+      crew.map((row, index) => [String(index + 1), row.name, row.position]),
+    );
   }
 
   doc.sectionLabel("RINCIAN BARANG");
@@ -115,6 +133,9 @@ export async function buildDamageReportPdf(turnover: DamageDocument) {
   const doc = await createLetter();
   const damaged = turnover.items.filter((row) => row.damaged > 0);
   const customer = turnover.deliveryNote.request.customer;
+  const crew = Array.isArray(turnover.deliveryNote.request.personnel)
+    ? (turnover.deliveryNote.request.personnel as RequestPersonnel[])
+    : [];
 
   doc.title("BERITA ACARA BARANG RUSAK", `Turnover ${turnover.deliveryNote.number}`);
   doc.meta([
@@ -130,6 +151,18 @@ export async function buildDamageReportPdf(turnover: DamageDocument) {
     ["Diserahkan oleh", turnover.submittedBy.name],
     ["Diverifikasi oleh", turnover.verifiedBy?.name ?? "Menunggu verifikasi"],
   ]);
+
+  if (crew.length > 0) {
+    doc.sectionLabel("PERSONEL YANG DITUGASKAN");
+    doc.table(
+      [
+        { label: "No", width: 34, align: "center" },
+        { label: "Nama", width: 287 },
+        { label: "Jabatan", width: 190.28 },
+      ],
+      crew.map((row, index) => [String(index + 1), row.name, row.position]),
+    );
+  }
 
   doc.sectionLabel("RINCIAN BARANG RUSAK");
   doc.table(
